@@ -28,10 +28,10 @@ interface Product {
   id: string
   name: string
   slug: string
-  category: string
   categoryId: string
   price: string
   collection?: { title: string } | null
+  dbCategory?: { name: string } | null
   isFeatured: boolean
   isAvailable: boolean
 }
@@ -211,7 +211,9 @@ export default function ProductsPage() {
                   <TableRow key={product.id}>
                     <TableCell className="font-medium">{product.name}</TableCell>
                     <TableCell>
-                      <Badge variant="outline">{product.category}</Badge>
+                      <Badge variant="outline">
+                        {product.dbCategory?.name || '-'}
+                      </Badge>
                     </TableCell>
                     <TableCell>{product.price}</TableCell>
                     <TableCell className="text-muted-foreground">

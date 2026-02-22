@@ -18,6 +18,14 @@ export default async function ShopPage() {
     orderBy: { createdAt: "desc" },
   })
 
+  console.log('ShopPage - Fetched products:', products.map(p => ({ 
+    id: p.id, 
+    name: p.name, 
+    isAvailable: p.isAvailable,
+    categoryId: p.categoryId,
+    categoryName: p.dbCategory?.name 
+  })))
+
   const categories = await prisma.category.findMany({
     orderBy: { name: "asc" },
   })

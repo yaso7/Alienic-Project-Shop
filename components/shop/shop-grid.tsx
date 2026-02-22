@@ -145,7 +145,8 @@ export function ShopGrid({ products, categories }: ShopGridProps) {
     totalPages,
     currentPage,
     startIndex,
-    paginatedProducts: paginatedProducts.length
+    paginatedProducts: paginatedProducts.length,
+    products: products.map(p => ({ id: p.id, name: p.name, categoryName: p.dbCategory?.name }))
   })
 
   return (
