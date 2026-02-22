@@ -1,11 +1,14 @@
-import { requireAuth } from "@/lib/auth"
+import { getCurrentAdmin } from "@/lib/auth"
 import { NextResponse } from "next/server"
 import { put } from "@vercel/blob"
 
 export async function POST(request: Request) {
-  await requireAuth()
-
   try {
+    const admin = await getCurrentAdmin()
+    if (!admin) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
     const formData = await request.formData()
     const file = formData.get("file") as File
 
@@ -24,19 +27,24 @@ export async function POST(request: Request) {
     const filename = `product-${timestamp}-${random}.${ext}`
 
     try {
+      console.log("BLOB_READ_WRITE_TOKEN present:", !!process.env.BLOB_READ_WRITE_TOKEN)
+      console.log("Uploading file:", filename, "Size:", file.size, "Type:", file.type)
+      
       // Upload to Vercel Blob storage
       const blob = await put(filename, file, {
-        access: 'public',
+        access: 'private',
       })
 
+      console.log("Upload successful:", blob.url)
       // Return the blob URL to be stored in DB
       return NextResponse.json({ imagePath: blob.url })
-    } catch (e) {
-      console.error("Upload error:", e)
-      return NextResponse.json({ error: "Upload failed" }, { status: 500 })
+    } catch (e: any) {
+      console.error("Upload error:", e.message || e)
+      console.error("Full upload error:", e)
+      return NextResponse.json({ error: "Upload failed", details: e.message }, { status: 500 })
     }
-  } catch (e) {
-    console.error("Upload error:", e)
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 })
+  } catch (e: any) {
+    console.error("Request error:", e.message || e)
+    return NextResponse.json({ error: "Request failed", details: e.message }, { status: 500 })
   }
 }

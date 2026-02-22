@@ -101,7 +101,9 @@ export function ProductForm({ action, product, collections }: ProductFormProps) 
       })
 
       if (!res.ok) {
-        throw new Error("Upload failed")
+        const errorData = await res.json()
+        console.error("Upload failed:", errorData)
+        throw new Error(errorData.error || "Upload failed")
       }
 
       const data = await res.json()

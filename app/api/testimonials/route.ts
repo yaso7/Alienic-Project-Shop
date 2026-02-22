@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
 
         // Upload to Vercel Blob storage
         const blob = await put(filename, imageFile, {
-          access: 'public',
+          access: 'private',
         })
 
         testimonialImage = blob.url
