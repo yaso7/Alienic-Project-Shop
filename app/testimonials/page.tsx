@@ -12,7 +12,10 @@ export const metadata: Metadata = {
 export default async function TestimonialsPage() {
   const testimonials = await prisma.testimonial.findMany({
     where: { status: "Approved" },
-    include: { product: true },
+    include: { 
+      product: true,
+      image: true,
+    },
     orderBy: { createdAt: "desc" },
   })
   return (
@@ -45,6 +48,17 @@ export default async function TestimonialsPage() {
                 key={testimonial.id}
                 className="flex flex-col gap-4 p-8 bg-card border border-border hover:border-primary/20 transition-all duration-500"
               >
+                {/* Image display */}
+                {testimonial.image && (
+                  <div className="w-full h-48 overflow-hidden rounded-lg border border-border">
+                    <img
+                      src={testimonial.image.url}
+                      alt={testimonial.image.altText || `Photo from ${testimonial.name}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+
                 <div className="flex gap-1">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star

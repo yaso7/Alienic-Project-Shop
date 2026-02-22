@@ -31,6 +31,7 @@ interface Testimonial {
   text: string
   product: { name: string } | null
   status: string
+  hasMedia: boolean
 }
 
 interface PaginatedResponse {
@@ -176,6 +177,7 @@ export default function TestimonialsPage() {
                   <TableHead>Rating</TableHead>
                   <TableHead>Product</TableHead>
                   <TableHead>Text</TableHead>
+                  <TableHead>Media</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -213,6 +215,14 @@ export default function TestimonialsPage() {
                     </TableCell>
                     <TableCell className="text-muted-foreground max-w-xs truncate">
                       {testimonial.text}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={testimonial.hasMedia ? "default" : "secondary"}
+                        className={testimonial.hasMedia ? "bg-green-600" : ""}
+                      >
+                        {testimonial.hasMedia ? "Yes" : "No"}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge

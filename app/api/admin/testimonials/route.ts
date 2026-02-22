@@ -31,7 +31,10 @@ export async function GET(request: Request) {
     const [testimonials, total] = await Promise.all([
       prisma.testimonial.findMany({
         where,
-        include: { product: true },
+        include: { 
+          product: true,
+          image: true,
+        },
         orderBy: { createdAt: 'desc' },
         skip,
         take: pageSize,
@@ -39,8 +42,14 @@ export async function GET(request: Request) {
       prisma.testimonial.count({ where }),
     ])
 
+    // Transform testimonials to include hasMedia field
+    const transformedTestimonials = testimonials.map(testimonial => ({
+      ...testimonial,
+      hasMedia: !!testimonial.image,
+    }))
+
     return NextResponse.json({
-      testimonials,
+      testimonials: transformedTestimonials,
       total,
       page,
       pageSize,

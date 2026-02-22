@@ -1,7 +1,6 @@
 import { requireAuth } from "@/lib/auth"
-import { writeFile, mkdir } from "fs/promises"
-import { join } from "path"
 import { NextResponse } from "next/server"
+import { put } from "@vercel/blob"
 
 export async function POST(request: Request) {
   await requireAuth()
@@ -24,19 +23,18 @@ export async function POST(request: Request) {
     const ext = file.name.split(".").pop() || "jpg"
     const filename = `product-${timestamp}-${random}.${ext}`
 
-    // Create directory path
-    const uploadsDir = join(process.cwd(), "public", "media", "images", "products")
-    await mkdir(uploadsDir, { recursive: true })
+    try {
+      // Upload to Vercel Blob storage
+      const blob = await put(filename, file, {
+        access: 'public',
+      })
 
-    // Write file
-    const filepath = join(uploadsDir, filename)
-    const bytes = await file.arrayBuffer()
-    await writeFile(filepath, Buffer.from(bytes))
-
-    // Return the path to be stored in DB
-    const imagePath = `/media/images/products/${filename}`
-
-    return NextResponse.json({ imagePath })
+      // Return the blob URL to be stored in DB
+      return NextResponse.json({ imagePath: blob.url })
+    } catch (e) {
+      console.error("Upload error:", e)
+      return NextResponse.json({ error: "Upload failed" }, { status: 500 })
+    }
   } catch (e) {
     console.error("Upload error:", e)
     return NextResponse.json({ error: "Upload failed" }, { status: 500 })

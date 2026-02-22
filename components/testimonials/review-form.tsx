@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Star } from "lucide-react"
+import { Star, Upload, X } from "lucide-react"
 
 export function ReviewForm() {
   const [rating, setRating] = useState(0) // No default rating
@@ -9,6 +9,38 @@ export function ReviewForm() {
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [selectedImage, setSelectedImage] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        setError('Please select a valid image file')
+        return
+      }
+      
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Image size must be less than 5MB')
+        return
+      }
+
+      setSelectedImage(file)
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+      setError('') // Clear any previous errors
+    }
+  }
+
+  const removeImage = () => {
+    setSelectedImage(null)
+    setImagePreview(null)
+  }
 
   if (submitted) {
     return (
@@ -43,6 +75,8 @@ export function ReviewForm() {
       rating,
       review,
       ratingValue: rating,
+      hasImage: !!selectedImage,
+      imageSize: selectedImage?.size,
       formDataEntries: Array.from(formData.entries())
     })
 
@@ -65,16 +99,21 @@ export function ReviewForm() {
     }
 
     try {
+      // Create FormData for multipart/form-data to handle image upload
+      const submitFormData = new FormData()
+      submitFormData.append("name", name)
+      submitFormData.append("location", location || "")
+      submitFormData.append("rating", rating.toString())
+      submitFormData.append("text", review)
+      submitFormData.append("product", product || "")
+      
+      if (selectedImage) {
+        submitFormData.append("image", selectedImage)
+      }
+
       const res = await fetch("/api/testimonials", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          location: location || undefined,
-          rating,
-          text: review,
-          product: product || undefined,
-        }),
+        body: submitFormData, // Use FormData instead of JSON
       })
 
       if (!res.ok) {
@@ -200,6 +239,58 @@ export function ReviewForm() {
           placeholder="Share your experience with the piece..."
           className="bg-input border border-border px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none transition-colors resize-none"
         />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <label
+          htmlFor="image"
+          className="text-xs uppercase tracking-[0.2em] text-muted-foreground"
+        >
+          Photo (Optional)
+        </label>
+        {!imagePreview ? (
+          <div className="relative">
+            <input
+              id="image"
+              name="image"
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="sr-only"
+            />
+            <label
+              htmlFor="image"
+              className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-border bg-input px-4 py-8 cursor-pointer hover:border-primary/50 transition-colors"
+            >
+              <Upload size={24} className="text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">
+                Click to upload a photo of your piece
+              </span>
+              <span className="text-xs text-muted-foreground">
+                JPG, PNG, GIF up to 5MB
+              </span>
+            </label>
+          </div>
+        ) : (
+          <div className="relative">
+            <img
+              src={imagePreview}
+              alt="Preview of uploaded image"
+              className="w-full h-48 object-cover rounded-lg border border-border"
+            />
+            <button
+              type="button"
+              onClick={removeImage}
+              className="absolute top-2 right-2 bg-destructive/80 text-destructive-foreground p-1 rounded-full hover:bg-destructive transition-colors"
+              aria-label="Remove image"
+            >
+              <X size={16} />
+            </button>
+            <p className="text-xs text-muted-foreground mt-2">
+              {selectedImage?.name} ({(selectedImage?.size ? (selectedImage.size / 1024 / 1024).toFixed(2) : '0')} MB)
+            </p>
+          </div>
+        )}
       </div>
 
       <button
