@@ -26,7 +26,7 @@ interface ShopGridProps {
     story: string
     image: string
   }>
-  categories: Array<{ name: string; slug: string }>
+  categories: Array<{ id: string; name: string; slug: string }>
 }
 
 function ProductModal({
@@ -128,10 +128,7 @@ export function ShopGrid({ products, categories }: ShopGridProps) {
     activeCategory === "All"
       ? products
       : products.filter((p) => {
-          // Handle both enum values and category names
-          if (activeCategory === "Pendants") return p.category === "Pendant"
-          if (activeCategory === "Rings") return p.category === "Ring" 
-          if (activeCategory === "Chains") return p.category === "Chain"
+          // Filter by category name from database
           return p.category === activeCategory
         })
 
@@ -155,22 +152,37 @@ export function ShopGrid({ products, categories }: ShopGridProps) {
       {/* Filters */}
       <section className="py-8 px-6 border-b border-border">
         <div className="mx-auto max-w-6xl flex flex-wrap justify-center gap-4">
-          {["All", "Pendants", "Rings", "Chains", "One of One"].map((cat) => {
-            const displayName = cat
+          {/* All button */}
+          <button
+            onClick={() => {
+              setActiveCategory("All")
+              setCurrentPage(1) // Reset to first page when changing category
+            }}
+            className={`text-xs uppercase tracking-[0.2em] px-4 py-2 transition-all duration-300 ${
+              activeCategory === "All"
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground border border-border"
+            }`}
+          >
+            All
+          </button>
+          
+          {/* Dynamic category buttons */}
+          {categories.map((category) => {
             return (
               <button
-                key={cat}
+                key={category.id}
                 onClick={() => {
-                  setActiveCategory(cat)
+                  setActiveCategory(category.name)
                   setCurrentPage(1) // Reset to first page when changing category
                 }}
                 className={`text-xs uppercase tracking-[0.2em] px-4 py-2 transition-all duration-300 ${
-                  activeCategory === cat
+                  activeCategory === category.name
                     ? "bg-primary text-primary-foreground"
                     : "text-muted-foreground hover:text-foreground border border-border"
                 }`}
               >
-                {displayName}
+                {category.name}
               </button>
             )
           })}

@@ -16,13 +16,13 @@ import {
 } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 
 const productSchema = z.object({
   name: z.string().min(1, "Name is required"),
   slug: z.string().min(1, "Slug is required").regex(/^[a-z0-9-]+$/, "Slug must be lowercase with hyphens"),
-  category: z.enum(["Pendant", "Ring", "Chain", "OneOfOne", "Other"]),
+  category: z.string().min(1, "Category is required"),
   price: z.string().min(1, "Price is required"),
   material: z.string().min(1, "Material is required"),
   collectionId: z.string().optional(),
@@ -33,6 +33,13 @@ const productSchema = z.object({
 })
 
 type ProductFormData = z.infer<typeof productSchema>
+
+interface Category {
+  id: string
+  name: string
+  slug: string
+  description?: string
+}
 
 interface ProductFormProps {
   action: (formData: FormData) => Promise<void>
@@ -52,6 +59,9 @@ interface ProductFormProps {
 }
 
 export function ProductForm({ action, product, collections }: ProductFormProps) {
+  const [categories, setCategories] = useState<Category[]>([])
+  const [loadingCategories, setLoadingCategories] = useState(true)
+  
   const {
     register,
     handleSubmit,
@@ -74,10 +84,28 @@ export function ProductForm({ action, product, collections }: ProductFormProps) 
           isAvailable: product.isAvailable,
         }
       : {
-          category: "Pendant",
+          category: "",
           isAvailable: true,
         },
   })
+
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const response = await fetch('/api/admin/categories')
+        if (response.ok) {
+          const data = await response.json()
+          setCategories(data.categories || [])
+        }
+      } catch (error) {
+        console.error('Failed to fetch categories:', error)
+      } finally {
+        setLoadingCategories(false)
+      }
+    }
+
+    fetchCategories()
+  }, [])
 
   const category = watch("category")
   const isFeatured = watch("isFeatured")
@@ -157,19 +185,23 @@ export function ProductForm({ action, product, collections }: ProductFormProps) 
           <Label htmlFor="category">Category *</Label>
           <Select
             value={category}
-            onValueChange={(value) => setValue("category", value as any)}
+            onValueChange={(value) => setValue("category", value)}
+            disabled={loadingCategories}
           >
             <SelectTrigger>
-              <SelectValue />
+              <SelectValue placeholder={loadingCategories ? "Loading categories..." : "Select a category"} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Pendant">Pendant</SelectItem>
-              <SelectItem value="Ring">Ring</SelectItem>
-              <SelectItem value="Chain">Chain</SelectItem>
-              <SelectItem value="OneOfOne">One-of-One</SelectItem>
-              <SelectItem value="Other">Other</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.name}>
+                  {cat.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
+          {loadingCategories && (
+            <p className="text-sm text-muted-foreground">Loading categories...</p>
+          )}
         </div>
 
         <div className="space-y-2">
