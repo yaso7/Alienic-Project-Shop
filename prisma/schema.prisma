@@ -1,0 +1,153 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model AdminUser {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  hashedPassword String
+  sessions       Session[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("admin_users")
+}
+
+model Collection {
+  id             String   @id @default(cuid())
+  slug           String   @unique
+  title          String
+  subtitle       String?  // e.g., "Collection I — 2024"
+  description    String   @db.Text
+  shortDescription String? // Short description for featured sections
+  mood           String[] // Array of mood keywords
+  heroImage      String
+  order          Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  products Product[]
+
+  @@map("collections")
+}
+
+model Product {
+  id          String      @id @default(cuid())
+  slug        String      @unique
+  name        String
+  category    ProductCategory
+  categoryId  String?
+  dbCategory  Category?   @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  price       String      // Stored as string like "$85"
+  material    String
+  collectionId String?
+  collection  Collection? @relation(fields: [collectionId], references: [id], onDelete: SetNull)
+  story       String      @db.Text
+  image       String
+  isFeatured  Boolean     @default(false)
+  isAvailable Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  testimonials Testimonial[]
+
+  @@map("products")
+}
+
+enum ProductCategory {
+  Pendant
+  Ring
+  Chain
+  OneOfOne
+  Other
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  description String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products  Product[]
+
+  @@map("categories")
+}
+
+model Testimonial {
+  id        String            @id @default(cuid())
+  name      String
+  location  String?
+  rating    Int               @default(5) // 1-5 stars
+  text      String            @db.Text
+  productId String?
+  product   Product?          @relation(fields: [productId], references: [id], onDelete: SetNull)
+  source    TestimonialSource @default(Form)
+  status    TestimonialStatus @default(Pending)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@map("testimonials")
+}
+
+enum TestimonialSource {
+  Manual
+  Form
+}
+
+enum TestimonialStatus {
+  Pending
+  Approved
+  Rejected
+}
+
+model ContactMessage {
+  id        String              @id @default(cuid())
+  name      String
+  email     String
+  subject   String
+  message   String              @db.Text
+  status    ContactMessageStatus @default(New)
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
+  @@map("contact_messages")
+}
+
+model Session {
+  id         String    @id @default(cuid())
+  token      String    @unique
+  adminUserId String
+  adminUser  AdminUser @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  expires    DateTime
+  createdAt  DateTime  @default(now())
+
+  @@map("sessions")
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  type        String   // e.g., "contact", "testimonial", "system"
+  referenceId String?  // id of the related record (contactMessage/testimonial)
+  title       String?
+  body        String?  @db.Text
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@map("notifications")
+}
+
+enum ContactMessageStatus {
+  New
+  Read
+  Archived
+}
