@@ -7,24 +7,24 @@ import { X, Instagram } from "lucide-react"
 interface Product {
   id: string
   name: string
-  category: string
   price: string
   material: string
   collection: { title: string } | null
   story: string
   image: string
+  dbCategory?: { name: string } | null
 }
 
 interface ShopGridProps {
   products: Array<{
     id: string
     name: string
-    category: string
     price: string
     material: string
     collection: { title: string } | null
     story: string
     image: string
+    dbCategory?: { name: string } | null
   }>
   categories: Array<{ id: string; name: string; slug: string }>
 }
@@ -128,8 +128,9 @@ export function ShopGrid({ products, categories }: ShopGridProps) {
     activeCategory === "All"
       ? products
       : products.filter((p) => {
-          // Filter by category name from database
-          return p.category === activeCategory
+          // Use the category name from the database relationship
+          const categoryName = p.dbCategory?.name
+          return categoryName === activeCategory
         })
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage)

@@ -22,7 +22,7 @@ import Image from "next/image"
 const productSchema = z.object({
   name: z.string().min(1, "Name is required"),
   slug: z.string().min(1, "Slug is required").regex(/^[a-z0-9-]+$/, "Slug must be lowercase with hyphens"),
-  category: z.string().min(1, "Category is required"),
+  categoryId: z.string().min(1, "Category is required"),
   price: z.string().min(1, "Price is required"),
   material: z.string().min(1, "Material is required"),
   collectionId: z.string().optional(),
@@ -46,7 +46,7 @@ interface ProductFormProps {
   product?: {
     name: string
     slug: string
-    category: string
+    categoryId: string | null
     price: string
     material: string
     collectionId: string | null
@@ -74,7 +74,7 @@ export function ProductForm({ action, product, collections }: ProductFormProps) 
       ? {
           name: product.name,
           slug: product.slug,
-          category: product.category as any,
+          categoryId: product.categoryId || "",
           price: product.price,
           material: product.material,
           collectionId: product.collectionId || "",
@@ -84,7 +84,7 @@ export function ProductForm({ action, product, collections }: ProductFormProps) 
           isAvailable: product.isAvailable,
         }
       : {
-          category: "",
+          categoryId: "",
           isAvailable: true,
         },
   })
@@ -107,7 +107,7 @@ export function ProductForm({ action, product, collections }: ProductFormProps) 
     fetchCategories()
   }, [])
 
-  const category = watch("category")
+  const categoryId = watch("categoryId")
   const isFeatured = watch("isFeatured")
   const isAvailable = watch("isAvailable")
   const imagePath = watch("image")
@@ -149,7 +149,7 @@ export function ProductForm({ action, product, collections }: ProductFormProps) 
     const formData = new FormData()
     formData.append("name", data.name)
     formData.append("slug", data.slug)
-    formData.append("category", data.category)
+    formData.append("categoryId", data.categoryId || "")
     formData.append("price", data.price)
     formData.append("material", data.material)
     formData.append("collectionId", data.collectionId || "")
@@ -182,10 +182,10 @@ export function ProductForm({ action, product, collections }: ProductFormProps) 
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="category">Category *</Label>
+          <Label htmlFor="categoryId">Category *</Label>
           <Select
-            value={category}
-            onValueChange={(value) => setValue("category", value)}
+            value={categoryId}
+            onValueChange={(value) => setValue("categoryId", value)}
             disabled={loadingCategories}
           >
             <SelectTrigger>
@@ -193,7 +193,7 @@ export function ProductForm({ action, product, collections }: ProductFormProps) 
             </SelectTrigger>
             <SelectContent>
               {categories.map((cat) => (
-                <SelectItem key={cat.id} value={cat.name}>
+                <SelectItem key={cat.id} value={cat.id}>
                   {cat.name}
                 </SelectItem>
               ))}

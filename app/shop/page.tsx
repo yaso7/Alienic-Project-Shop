@@ -11,7 +11,10 @@ export const metadata: Metadata = {
 export default async function ShopPage() {
   const products = await prisma.product.findMany({
     where: { isAvailable: true },
-    include: { collection: true },
+    include: { 
+      collection: true,
+      dbCategory: true // Include the related category
+    },
     orderBy: { createdAt: "desc" },
   })
 

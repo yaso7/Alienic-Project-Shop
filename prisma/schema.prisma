@@ -39,7 +39,6 @@ model Product {
   id           String          @id @default(cuid())
   slug         String          @unique
   name         String
-  category     ProductCategory
   price        String
   material     String
   collectionId String?
@@ -134,14 +133,6 @@ model Notification {
   createdAt   DateTime @default(now())
 
   @@map("notifications")
-}
-
-enum ProductCategory {
-  Pendant
-  Ring
-  Chain
-  OneOfOne
-  Other
 }
 
 enum TestimonialSource {

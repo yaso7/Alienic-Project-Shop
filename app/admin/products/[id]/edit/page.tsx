@@ -27,7 +27,7 @@ export default async function EditProductPage({
     
     const name = formData.get("name") as string
     const slug = formData.get("slug") as string
-    const category = formData.get("category") as string
+    const categoryId = formData.get("categoryId") as string
     const price = formData.get("price") as string
     const material = formData.get("material") as string
     const collectionId = formData.get("collectionId") as string
@@ -41,7 +41,7 @@ export default async function EditProductPage({
       data: {
         name,
         slug,
-        category: category as any,
+        categoryId: categoryId || null,
         price,
         material,
         collectionId: collectionId || null,
