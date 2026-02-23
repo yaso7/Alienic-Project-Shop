@@ -29,7 +29,11 @@ export function DeleteDialog({ id, name, type, onSuccess }: DeleteDialogProps) {
   async function handleDelete() {
     setLoading(true)
     try {
-      const response = await fetch(`/api/admin/${type}s/${id}`, {
+      const apiUrl = type === 'category' 
+        ? `/api/admin/categories/${id}` 
+        : `/api/admin/${type}s/${id}`
+      
+      const response = await fetch(apiUrl, {
         method: 'DELETE',
       })
 

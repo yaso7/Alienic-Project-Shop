@@ -4,13 +4,14 @@ import { NextResponse } from "next/server"
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   await requireAuth()
+  const { id } = await params
 
   try {
     const category = await prisma.category.findUnique({
-      where: { id: params.id },
+      where: { id },
     })
 
     if (!category) {
@@ -26,16 +27,17 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   await requireAuth()
+  const { id } = await params
 
   try {
     const body = await request.json()
     const { name, slug, description } = body
 
     const category = await prisma.category.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         name,
         slug,
@@ -61,13 +63,14 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   await requireAuth()
+  const { id } = await params
 
   try {
     await prisma.category.delete({
-      where: { id: params.id },
+      where: { id },
     })
 
     return NextResponse.json({ success: true })
@@ -75,6 +78,18 @@ export async function DELETE(
     console.error('Category delete error', e)
     if (e.code === 'P2025') {
       return NextResponse.json({ error: 'Category not found' }, { status: 404 })
+    }
+    if (e.code === 'P2002') {
+      return NextResponse.json(
+        { error: 'Foreign key constraint violation: Cannot delete category with associated products' },
+        { status: 400 }
+      )
+    }
+    if (e.message && e.message.includes('foreign key constraint')) {
+      return NextResponse.json(
+        { error: 'Cannot delete category because it has products associated with it' },
+        { status: 400 }
+      )
     }
     return NextResponse.json({ error: 'Failed to delete category' }, { status: 500 })
   }
