@@ -86,7 +86,7 @@ function ProductModal({
 
         <div className="grid grid-cols-1 lg:grid-cols-2 h-full">
           <div className="relative">
-            <div className="relative aspect-square">
+            <div className="relative aspect-[9/16]">
               <ImageZoom
                 src={currentImage}
                 alt={product.name}
