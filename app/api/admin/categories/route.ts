@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
 
 export async function GET(request: Request) {
   await requireAuth()
@@ -74,6 +75,9 @@ export async function POST(request: Request) {
         description: description || null,
       },
     })
+
+    // Revalidate cache for shop page (categories)
+    revalidatePath('/shop')
 
     return NextResponse.json(category)
   } catch (e: any) {

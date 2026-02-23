@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
 
 export async function GET(
   request: Request,
@@ -45,6 +46,9 @@ export async function PUT(
       },
     })
 
+    // Revalidate cache for shop page (categories)
+    revalidatePath('/shop')
+
     return NextResponse.json(category)
   } catch (e: any) {
     console.error('Category update error', e)
@@ -72,6 +76,9 @@ export async function DELETE(
     await prisma.category.delete({
       where: { id },
     })
+
+    // Revalidate cache for shop page (categories)
+    revalidatePath('/shop')
 
     return NextResponse.json({ success: true })
   } catch (e: any) {

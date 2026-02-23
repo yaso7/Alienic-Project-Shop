@@ -1,6 +1,7 @@
 import { redirect, notFound } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { ProductForm } from "@/components/admin/product-form"
+import { revalidatePath } from "next/cache"
 
 export default async function EditProductPage({
   params,
@@ -51,6 +52,10 @@ export default async function EditProductPage({
         isAvailable,
       },
     })
+
+    // Revalidate cache for shop and home pages
+    revalidatePath('/shop')
+    revalidatePath('/')
 
     redirect("/admin/products")
   }

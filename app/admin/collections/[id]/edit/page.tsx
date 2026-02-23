@@ -1,6 +1,7 @@
 import { redirect, notFound } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { CollectionForm } from "@/components/admin/collection-form"
+import { revalidatePath } from "next/cache"
 
 export default async function EditCollectionPage({
   params,
@@ -47,6 +48,9 @@ export default async function EditCollectionPage({
         order,
       },
     })
+
+    // Revalidate cache for home page (featured collections)
+    revalidatePath('/')
 
     redirect("/admin/collections")
   }

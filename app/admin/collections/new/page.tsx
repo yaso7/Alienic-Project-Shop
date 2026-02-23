@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation"
 import { CollectionForm } from "@/components/admin/collection-form"
+import { revalidatePath } from "next/cache"
 
 export default function NewCollectionPage() {
   async function createCollection(formData: FormData) {
@@ -32,6 +33,9 @@ export default function NewCollectionPage() {
         order,
       },
     })
+
+    // Revalidate cache for home page (featured collections)
+    revalidatePath('/')
 
     redirect("/admin/collections")
   }

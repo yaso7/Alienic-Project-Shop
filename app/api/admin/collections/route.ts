@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
 
 export async function GET(request: Request) {
   await requireAuth()
@@ -42,5 +43,48 @@ export async function GET(request: Request) {
   } catch (e) {
     console.error('Collections fetch error', e)
     return NextResponse.json({ error: 'Failed to fetch collections' }, { status: 500 })
+  }
+}
+
+export async function POST(request: Request) {
+  await requireAuth()
+
+  try {
+    const body = await request.json()
+    const { title, slug, subtitle, description, shortDescription, mood, heroImage, order } = body
+
+    if (!title || !slug) {
+      return NextResponse.json(
+        { error: 'Title and slug are required' },
+        { status: 400 }
+      )
+    }
+
+    const collection = await prisma.collection.create({
+      data: {
+        title,
+        slug,
+        subtitle: subtitle || null,
+        description,
+        shortDescription: shortDescription || null,
+        mood: mood || [],
+        heroImage,
+        order: order || 0,
+      },
+    })
+
+    // Revalidate cache for home page (featured collections)
+    revalidatePath('/')
+
+    return NextResponse.json(collection)
+  } catch (e: any) {
+    console.error('Collection creation error', e)
+    if (e.code === 'P2002') {
+      return NextResponse.json(
+        { error: 'Collection with this title or slug already exists' },
+        { status: 400 }
+      )
+    }
+    return NextResponse.json({ error: 'Failed to create collection' }, { status: 500 })
   }
 }

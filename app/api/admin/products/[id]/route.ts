@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { requireAuth } from "@/lib/auth"
+import { revalidatePath } from "next/cache"
 
 export async function DELETE(
   request: NextRequest,
@@ -13,6 +14,11 @@ export async function DELETE(
     await prisma.product.delete({
       where: { id },
     })
+    
+    // Revalidate cache for shop and home pages
+    revalidatePath('/shop')
+    revalidatePath('/')
+    
     return NextResponse.json({ success: true })
   } catch (error: any) {
     console.error("Delete error:", error)
@@ -40,6 +46,11 @@ export async function POST(
       await prisma.product.delete({
         where: { id },
       })
+      
+      // Revalidate cache for shop and home pages
+      revalidatePath('/shop')
+      revalidatePath('/')
+      
       return NextResponse.json({ success: true })
     } catch (error) {
       console.error("Delete error:", error)

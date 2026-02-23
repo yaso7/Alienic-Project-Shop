@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { ProductForm } from "@/components/admin/product-form"
+import { revalidatePath } from "next/cache"
 
 export default async function NewProductPage() {
   const collections = await prisma.collection.findMany({
@@ -36,6 +37,10 @@ export default async function NewProductPage() {
         isAvailable,
       },
     })
+
+    // Revalidate cache for shop and home pages
+    revalidatePath('/shop')
+    revalidatePath('/')
 
     redirect("/admin/products")
   }
