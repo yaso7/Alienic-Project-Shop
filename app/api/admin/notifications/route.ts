@@ -39,15 +39,16 @@ export async function GET() {
 
     const testimonials = await prisma.testimonial.findMany({
       where: { id: { in: testimonialIds } },
-      select: { id: true, rating: true }
+      select: { id: true, rating: true, status: true }
     })
 
-    const testimonialMap = new Map(testimonials.map(t => [t.id, t.rating]))
+    const testimonialMap = new Map(testimonials.map(t => [t.id, { rating: t.rating, status: t.status }]))
 
     const pendingTestimonials = testimonialNotifications.map(n => ({
       id: n.id,
       name: n.title || 'Testimonial',
-      rating: n.referenceId ? (testimonialMap.get(n.referenceId) || 0) : 0,
+      rating: n.referenceId ? (testimonialMap.get(n.referenceId)?.rating || 0) : 0,
+      status: n.referenceId ? (testimonialMap.get(n.referenceId)?.status || 'Pending') : 'Pending',
       createdAt: n.createdAt.toISOString(),
     }))
 
@@ -87,14 +88,35 @@ export async function POST(request: Request) {
     // Approve or reject testimonials from the dropdown
     if ((body?.action === 'approveTestimonial' || body?.action === 'rejectTestimonial') && body?.id) {
       const status = body.action === 'approveTestimonial' ? 'Approved' : 'Rejected'
-      await prisma.testimonial.update({ where: { id: body.id }, data: { status } })
+      
+      // Get the notification to find the testimonial referenceId
+      const notification = await prisma.notification.findUnique({
+        where: { id: body.id },
+        select: { referenceId: true }
+      })
+      
+      if (!notification?.referenceId) {
+        return NextResponse.json({ error: 'Testimonial not found' }, { status: 404 })
+      }
+      
+      // Update the actual testimonial using the referenceId
+      await prisma.testimonial.update({ 
+        where: { id: notification.referenceId }, 
+        data: { status } 
+      })
+
+      // Mark the notification as read since it's been acted upon
+      await prisma.notification.update({ 
+        where: { id: body.id }, 
+        data: { isRead: true } 
+      })
 
       // Create a system notification about the review action (optional)
       await prisma.notification.create({ data: {
         type: 'system',
-        referenceId: body.id,
+        referenceId: notification.referenceId,
         title: `Testimonial ${status}`,
-        body: `Testimonial ${body.id} was ${status.toLowerCase()} by admin.`,
+        body: `Testimonial ${notification.referenceId} was ${status.toLowerCase()} by admin.`,
       }})
 
       return NextResponse.json({ success: true })

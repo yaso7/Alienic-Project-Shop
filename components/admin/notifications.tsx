@@ -22,7 +22,7 @@ import { Bell } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 type ContactItem = { id: string; name: string; subject: string; createdAt: string }
-type TestimonialItem = { id: string; name: string; rating: number; createdAt: string }
+type TestimonialItem = { id: string; name: string; rating: number; status: string; createdAt: string }
 
 export function Notifications() {
   const router = useRouter()
@@ -96,7 +96,7 @@ export function Notifications() {
         credentials: 'same-origin',
       })
       if (!res.ok) throw new Error('Failed')
-      setTestimonials(prev => prev.filter(t => t.id !== id))
+      setTestimonials((prev: TestimonialItem[]) => prev.filter(t => t.id !== id))
       setCount(c => Math.max(0, c - 1))
       setSelectedItem(null)
     } catch (e) {
@@ -113,7 +113,7 @@ export function Notifications() {
         credentials: 'same-origin',
       })
       if (!res.ok) throw new Error('Failed')
-      setTestimonials(prev => prev.filter(t => t.id !== id))
+      setTestimonials((prev: TestimonialItem[]) => prev.filter(t => t.id !== id))
       setCount(c => Math.max(0, c - 1))
       setSelectedItem(null)
     } catch (e) {
@@ -148,7 +148,7 @@ export function Notifications() {
         body: JSON.stringify({ action: 'markMessageRead', messageId }),
         credentials: 'same-origin',
       })
-      setItemDetails(prev => (prev ? { ...prev, status: 'Read' } : null))
+      setItemDetails((prev: any) => (prev ? { ...prev, status: 'Read' } : null))
     } catch (e) {
       console.error('mark message error', e)
     }
@@ -220,27 +220,31 @@ export function Notifications() {
               >
                 <div className="w-full">
                   <div className="text-sm font-medium">{t.name}</div>
-                  <div className="text-xs text-muted-foreground">New testimonial — {t.rating}★</div>
+                  <div className="text-xs text-muted-foreground">New testimonial — {t.rating}★ • {t.status}</div>
                 </div>
                 <div className="w-full flex gap-2">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      approveTestimonial(t.id)
-                    }}
-                    className="text-xs px-2 py-1 rounded bg-primary text-background hover:bg-primary/90"
-                  >
-                    Approve
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      rejectTestimonial(t.id)
-                    }}
-                    className="text-xs px-2 py-1 rounded bg-muted text-foreground hover:bg-accent"
-                  >
-                    Reject
-                  </button>
+                  {t.status !== 'Approved' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        approveTestimonial(t.id)
+                      }}
+                      className="text-xs px-2 py-1 rounded bg-primary text-background hover:bg-primary/90"
+                    >
+                      Approve
+                    </button>
+                  )}
+                  {t.status !== 'Rejected' && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        rejectTestimonial(t.id)
+                      }}
+                      className="text-xs px-2 py-1 rounded bg-muted text-foreground hover:bg-accent"
+                    >
+                      Reject
+                    </button>
+                  )}
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
@@ -275,8 +279,8 @@ export function Notifications() {
             </DialogTitle>
             <DialogDescription>
               {selectedItem?.type === 'contact'
-                ? `From ${itemDetails?.name || selectedItem.data.name}`
-                : `${itemDetails?.name || selectedItem?.data.name} · ${itemDetails?.rating || selectedItem?.data.rating}★`}
+                ? `From ${itemDetails?.name || selectedItem?.data?.name}`
+                : `${itemDetails?.name || (selectedItem?.data as TestimonialItem)?.name} · ${itemDetails?.rating || (selectedItem?.data as TestimonialItem)?.rating}★`}
             </DialogDescription>
           </DialogHeader>
 
@@ -332,15 +336,19 @@ export function Notifications() {
             )}
             {selectedItem?.type === 'testimonial' && (
               <>
-                <Button
-                  variant="outline"
-                  onClick={() => rejectTestimonial(selectedItem.data.id)}
-                >
-                  Reject
-                </Button>
-                <Button onClick={() => approveTestimonial(selectedItem.data.id)}>
-                  Approve
-                </Button>
+                {itemDetails?.status !== 'Rejected' && (
+                  <Button
+                    variant="outline"
+                    onClick={() => rejectTestimonial(selectedItem.data.id)}
+                  >
+                    Reject
+                  </Button>
+                )}
+                {itemDetails?.status !== 'Approved' && (
+                  <Button onClick={() => approveTestimonial(selectedItem.data.id)}>
+                    Approve
+                  </Button>
+                )}
               </>
             )}
           </DialogFooter>

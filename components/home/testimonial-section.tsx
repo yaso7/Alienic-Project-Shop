@@ -5,7 +5,6 @@ import { prisma } from "@/lib/prisma"
 async function getFeaturedTestimonial() {
   return await prisma.testimonial.findFirst({
     where: { status: "Approved" },
-    include: { product: true },
     orderBy: { createdAt: "desc" }
   })
 }

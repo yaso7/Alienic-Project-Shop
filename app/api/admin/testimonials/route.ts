@@ -32,7 +32,6 @@ export async function GET(request: Request) {
       prisma.testimonial.findMany({
         where,
         include: { 
-          product: true,
           image: true,
         },
         orderBy: { createdAt: 'desc' },

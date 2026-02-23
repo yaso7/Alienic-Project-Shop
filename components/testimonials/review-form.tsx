@@ -229,13 +229,14 @@ export function ReviewForm() {
           htmlFor="review"
           className="text-xs uppercase tracking-[0.2em] text-muted-foreground"
         >
-          Your Confessional
+          Your Confessional (max 500 characters)
         </label>
         <textarea
           id="review"
           name="review"
           required
           rows={5}
+          maxLength={500}
           placeholder="Share your experience with the piece..."
           className="bg-input border border-border px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none transition-colors resize-none"
         />

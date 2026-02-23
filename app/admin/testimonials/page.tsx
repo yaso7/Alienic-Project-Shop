@@ -29,9 +29,15 @@ interface Testimonial {
   location: string | null
   rating: number
   text: string
-  product: { name: string } | null
+  pieceAcquired: string | null
   status: string
   hasMedia: boolean
+  image?: {
+    id: string
+    url: string
+    altText?: string | null
+    mimeType?: string | null
+  } | null
 }
 
 interface PaginatedResponse {
@@ -175,7 +181,7 @@ export default function TestimonialsPage() {
                 <TableRow>
                   <TableHead>Name</TableHead>
                   <TableHead>Rating</TableHead>
-                  <TableHead>Product</TableHead>
+                  <TableHead>Piece</TableHead>
                   <TableHead>Text</TableHead>
                   <TableHead>Media</TableHead>
                   <TableHead>Status</TableHead>
@@ -211,7 +217,7 @@ export default function TestimonialsPage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {testimonial.product?.name || '-'}
+                      {testimonial.pieceAcquired || '-'}
                     </TableCell>
                     <TableCell className="text-muted-foreground max-w-xs truncate">
                       {testimonial.text}

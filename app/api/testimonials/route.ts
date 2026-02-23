@@ -11,6 +11,26 @@ const testimonialSchema = z.object({
   product: z.string().optional(),
 })
 
+export async function GET() {
+  try {
+    const testimonials = await prisma.testimonial.findMany({
+      where: { status: "Approved" },
+      include: {
+        image: true,
+      },
+      orderBy: { createdAt: "desc" },
+    })
+
+    return NextResponse.json(testimonials)
+  } catch (error) {
+    console.error("Failed to fetch testimonials:", error)
+    return NextResponse.json(
+      { error: "Failed to fetch testimonials" },
+      { status: 500 }
+    )
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
@@ -74,15 +94,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Try to find product by name if provided
-    let productId: string | undefined
-    if (data.product) {
-      const product = await prisma.product.findFirst({
-        where: { name: { contains: data.product, mode: "insensitive" } },
-      })
-      productId = product?.id
-    }
-
     // Create testimonial image record if image was uploaded
     let imageId: string | undefined
     if (testimonialImage) {
@@ -103,7 +114,7 @@ export async function POST(request: NextRequest) {
         location: data.location || null,
         rating: data.rating,
         text: data.text,
-        productId: productId || null,
+        pieceAcquired: data.product || null,
         imageId: imageId || null,
         source: "Form",
         status: "Pending",

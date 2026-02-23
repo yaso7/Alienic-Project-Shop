@@ -20,8 +20,14 @@ interface TestimonialActionsProps {
     location: string | null
     rating: number
     text: string
-    product: { name: string } | null
+    pieceAcquired: string | null
     status: string
+    image?: {
+      id: string
+      url: string
+      altText?: string | null
+      mimeType?: string | null
+    } | null
   }
 }
 
@@ -39,12 +45,15 @@ export function TestimonialActions({ testimonial }: TestimonialActionsProps) {
       })
 
       if (res.ok) {
-        router.refresh()
+        window.location.reload()
       } else {
-        alert("Failed to update testimonial")
+        const errorData = await res.json().catch(() => ({}))
+        console.error("Update failed:", errorData)
+        alert(`Failed to update testimonial: ${errorData.error || "Unknown error"}`)
       }
     } catch (error) {
-      alert("Failed to update testimonial")
+      console.error("Network error:", error)
+      alert("Failed to update testimonial: Network error")
     } finally {
       setLoading(false)
     }
@@ -63,7 +72,7 @@ export function TestimonialActions({ testimonial }: TestimonialActionsProps) {
             <DialogTitle>{testimonial.name}</DialogTitle>
             <DialogDescription>
               {testimonial.location && `${testimonial.location} • `}
-              {testimonial.product?.name || "No product"}
+              {testimonial.pieceAcquired || "No piece specified"}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -78,6 +87,23 @@ export function TestimonialActions({ testimonial }: TestimonialActionsProps) {
               ))}
             </div>
             <p className="text-sm leading-relaxed">{testimonial.text}</p>
+            {testimonial.image && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium">Attached Image:</h4>
+                <div className="border border-border rounded-lg overflow-hidden bg-muted/50">
+                  <img
+                    src={testimonial.image.url}
+                    alt={testimonial.image.altText || `Testimonial image from ${testimonial.name}`}
+                    className="w-full h-auto max-h-64 object-contain"
+                  />
+                </div>
+                {testimonial.image.altText && (
+                  <p className="text-xs text-muted-foreground italic">
+                    Alt text: {testimonial.image.altText}
+                  </p>
+                )}
+              </div>
+            )}
             <div className="flex gap-2 pt-4">
               {testimonial.status !== "Approved" && (
                 <Button
@@ -105,28 +131,15 @@ export function TestimonialActions({ testimonial }: TestimonialActionsProps) {
         </DialogContent>
       </Dialog>
 
-      {testimonial.status === "Pending" && (
-        <>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => updateStatus("Approved")}
-            disabled={loading}
-            className="text-green-600"
-          >
-            <Check className="size-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => updateStatus("Rejected")}
-            disabled={loading}
-            className="text-red-600"
-          >
-            <X className="size-4" />
-          </Button>
-        </>
-      )}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => updateStatus(testimonial.status === "Approved" ? "Rejected" : "Approved")}
+        disabled={loading}
+        className={testimonial.status === "Approved" ? "text-red-600" : "text-green-600"}
+      >
+        {testimonial.status === "Approved" ? <X className="size-4" /> : <Check className="size-4" />}
+      </Button>
     </div>
   )
 }

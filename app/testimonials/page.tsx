@@ -1,23 +1,66 @@
-import type { Metadata } from "next"
+"use client"
+
 import { Star } from "lucide-react"
 import { ReviewForm } from "@/components/testimonials/review-form"
-import { prisma } from "@/lib/prisma"
+import { ImageModal } from "@/components/testimonials/image-modal"
+import { useState, useEffect } from "react"
 
-export const metadata: Metadata = {
-  title: "Testimonials",
-  description:
-    "Read confessionals from those who carry Alienic pieces — and share your own tale.",
+interface Testimonial {
+  id: string
+  name: string
+  location?: string | null
+  rating: number
+  text: string
+  pieceAcquired?: string | null
+  image?: {
+    id: string
+    url: string
+    altText?: string | null
+  } | null
 }
 
-export default async function TestimonialsPage() {
-  const testimonials = await prisma.testimonial.findMany({
-    where: { status: "Approved" },
-    include: { 
-      product: true,
-      image: true,
-    },
-    orderBy: { createdAt: "desc" },
-  })
+export default function TestimonialsPage() {
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([])
+  const [loading, setLoading] = useState(true)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [selectedImage, setSelectedImage] = useState<{ url: string; altText: string } | null>(null)
+
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const response = await fetch("/api/testimonials")
+        if (response.ok) {
+          const data = await response.json()
+          setTestimonials(data)
+        }
+      } catch (error) {
+        console.error("Failed to fetch testimonials:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchTestimonials()
+  }, [])
+
+  const openImageModal = (imageUrl: string, altText: string) => {
+    setSelectedImage({ url: imageUrl, altText })
+    setModalOpen(true)
+  }
+
+  const closeModal = () => {
+    setModalOpen(false)
+    setSelectedImage(null)
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-24 flex items-center justify-center">
+        <div className="text-muted-foreground">Loading testimonials...</div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen pt-24">
       {/* Header */}
@@ -48,17 +91,6 @@ export default async function TestimonialsPage() {
                 key={testimonial.id}
                 className="flex flex-col gap-4 p-8 bg-card border border-border hover:border-primary/20 transition-all duration-500"
               >
-                {/* Image display */}
-                {testimonial.image && (
-                  <div className="w-full h-48 overflow-hidden rounded-lg border border-border">
-                    <img
-                      src={testimonial.image.url}
-                      alt={testimonial.image.altText || `Photo from ${testimonial.name}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                )}
-
                 <div className="flex gap-1">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
@@ -77,6 +109,22 @@ export default async function TestimonialsPage() {
                   {`"${testimonial.text}"`}
                 </blockquote>
 
+                {/* Small square image */}
+                {testimonial.image && (
+                  <div className="mt-4 flex justify-left">
+                    <div 
+                      className="w-20 h-20 overflow-hidden rounded-lg border border-border cursor-pointer hover:border-primary/50 transition-colors"
+                      onClick={() => openImageModal(testimonial.image!.url, testimonial.image!.altText || `Photo from ${testimonial.name}`)}
+                    >
+                      <img
+                        src={testimonial.image.url}
+                        alt={testimonial.image.altText || `Photo from ${testimonial.name}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <div className="gothic-divider w-full" />
 
                 <div className="flex items-center justify-between">
@@ -90,9 +138,9 @@ export default async function TestimonialsPage() {
                       </p>
                     )}
                   </div>
-                  {testimonial.product && (
+                  {testimonial.pieceAcquired && (
                     <p className="text-sm uppercase tracking-[0.2em] text-primary">
-                      {testimonial.product.name}
+                      {testimonial.pieceAcquired}
                     </p>
                   )}
                 </div>
@@ -118,6 +166,16 @@ export default async function TestimonialsPage() {
         </div>
         <ReviewForm />
       </section>
+
+      {/* Image Modal */}
+      {selectedImage && (
+        <ImageModal
+          isOpen={modalOpen}
+          onClose={closeModal}
+          imageUrl={selectedImage.url}
+          altText={selectedImage.altText}
+        />
+      )}
     </div>
   )
 }
