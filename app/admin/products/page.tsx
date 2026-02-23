@@ -236,7 +236,11 @@ export default function ProductsPage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <ProductActions productId={product.id} />
+                      <ProductActions 
+                        productId={product.id} 
+                        productName={product.name}
+                        onSuccess={fetchProducts}
+                      />
                     </TableCell>
                   </TableRow>
                 ))}

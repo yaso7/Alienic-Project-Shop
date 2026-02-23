@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast'
 interface DeleteDialogProps {
   id: string
   name: string
-  type: 'category' | 'collection'
+  type: 'category' | 'collection' | 'product'
   onSuccess?: () => void
 }
 

@@ -2,6 +2,30 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { requireAuth } from "@/lib/auth"
 
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  await requireAuth()
+  const { id } = await params
+
+  try {
+    await prisma.product.delete({
+      where: { id },
+    })
+    return NextResponse.json({ success: true })
+  } catch (error: any) {
+    console.error("Delete error:", error)
+    if (error.code === 'P2025') {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 })
+    }
+    return NextResponse.json(
+      { error: "Failed to delete product" },
+      { status: 500 }
+    )
+  }
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
