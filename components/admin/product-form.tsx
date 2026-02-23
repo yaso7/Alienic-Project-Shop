@@ -18,6 +18,7 @@ import { Switch } from "@/components/ui/switch"
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import Image from "next/image"
+import { X, Plus } from "lucide-react"
 
 const productSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -27,7 +28,8 @@ const productSchema = z.object({
   material: z.string().min(1, "Material is required"),
   collectionId: z.string().optional(),
   story: z.string().min(1, "Story is required"),
-  image: z.string().min(1, "Image is required"),
+  image: z.string().min(1, "At least one image is required"),
+  images: z.array(z.string()).optional(),
   isFeatured: z.boolean().default(false),
   isAvailable: z.boolean().default(true),
 })
@@ -52,6 +54,7 @@ interface ProductFormProps {
     collectionId: string | null
     story: string
     image: string
+    images?: string[]
     isFeatured: boolean
     isAvailable: boolean
   }
@@ -61,6 +64,8 @@ interface ProductFormProps {
 export function ProductForm({ action, product, collections }: ProductFormProps) {
   const [categories, setCategories] = useState<Category[]>([])
   const [loadingCategories, setLoadingCategories] = useState(true)
+  const [productImages, setProductImages] = useState<string[]>(product?.images || (product?.image ? [product.image] : []))
+  const [uploading, setUploading] = useState(false)
   
   const {
     register,
@@ -107,42 +112,91 @@ export function ProductForm({ action, product, collections }: ProductFormProps) 
     fetchCategories()
   }, [])
 
+  // Auto-generate slug from name
+  const nameValue = watch("name")
+  const slugValue = watch("slug")
+  
+  const generateSlug = (name: string) => {
+    return name
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+  }
+  
+  useEffect(() => {
+    if (!product && nameValue) { // Only auto-generate for new products when nameValue exists
+      setValue("slug", generateSlug(nameValue))
+    }
+  }, [nameValue, setValue, product])
+
   const categoryId = watch("categoryId")
   const isFeatured = watch("isFeatured")
   const isAvailable = watch("isAvailable")
   const imagePath = watch("image")
-  const [imagePreview, setImagePreview] = useState<string | null>(product?.image || null)
-  const [uploading, setUploading] = useState(false)
+  const [imagePreview, setImagePreview] = useState<string | null>(product?.image || productImages[0] || null)
 
   async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const files = Array.from(e.target.files || [])
+    if (!files.length) return
 
     setUploading(true)
     try {
-      const formData = new FormData()
-      formData.append("file", file)
+      const uploadPromises = files.map(async (file) => {
+        const formData = new FormData()
+        formData.append("file", file)
 
-      const res = await fetch("/api/admin/upload/product-image", {
-        method: "POST",
-        body: formData,
+        const res = await fetch("/api/admin/upload/product-image", {
+          method: "POST",
+          body: formData,
+        })
+
+        if (!res.ok) {
+          const errorData = await res.json()
+          console.error("Upload failed:", errorData)
+          throw new Error(errorData.error || "Upload failed")
+        }
+
+        const data = await res.json()
+        return data.imagePath
       })
 
-      if (!res.ok) {
-        const errorData = await res.json()
-        console.error("Upload failed:", errorData)
-        throw new Error(errorData.error || "Upload failed")
+      const uploadedImages = await Promise.all(uploadPromises)
+      const newImages = [...productImages, ...uploadedImages]
+      setProductImages(newImages)
+      
+      // Set the first image as the main image if none is set
+      if (!imagePath || imagePath === product?.image) {
+        setValue("image", uploadedImages[0])
+        setImagePreview(uploadedImages[0])
       }
-
-      const data = await res.json()
-      setValue("image", data.imagePath)
-      setImagePreview(data.imagePath)
+      
+      setValue("images", newImages)
     } catch (error) {
       console.error("Upload error:", error)
-      alert("Failed to upload image")
+      alert("Failed to upload images")
     } finally {
       setUploading(false)
     }
+  }
+
+  function removeImage(index: number) {
+    const newImages = productImages.filter((_, i) => i !== index)
+    setProductImages(newImages)
+    setValue("images", newImages)
+    
+    // Update main image if necessary
+    if (imagePreview === productImages[index]) {
+      const newMainImage = newImages[0] || ""
+      setValue("image", newMainImage)
+      setImagePreview(newMainImage)
+    }
+  }
+
+  function setAsMainImage(imageUrl: string) {
+    setValue("image", imageUrl)
+    setImagePreview(imageUrl)
   }
 
   async function onSubmit(data: ProductFormData) {
@@ -155,6 +209,7 @@ export function ProductForm({ action, product, collections }: ProductFormProps) 
     formData.append("collectionId", data.collectionId || "")
     formData.append("story", data.story)
     formData.append("image", data.image)
+    formData.append("images", JSON.stringify(productImages))
     formData.append("isFeatured", data.isFeatured ? "on" : "")
     formData.append("isAvailable", data.isAvailable ? "on" : "")
     await action(formData)
@@ -173,7 +228,15 @@ export function ProductForm({ action, product, collections }: ProductFormProps) 
 
         <div className="space-y-2">
           <Label htmlFor="slug">Slug *</Label>
-          <Input id="slug" {...register("slug")} placeholder="the-void-pendant" />
+          <Input 
+            id="slug" 
+            {...register("slug")} 
+            placeholder="the-void-pendant"
+            disabled={!product}
+          />
+          <p className="text-sm text-muted-foreground">
+            URL-friendly identifier (auto-generated for new products)
+          </p>
           {errors.slug && (
             <p className="text-sm text-destructive">{errors.slug.message}</p>
           )}
@@ -206,7 +269,18 @@ export function ProductForm({ action, product, collections }: ProductFormProps) 
 
         <div className="space-y-2">
           <Label htmlFor="price">Price *</Label>
-          <Input id="price" {...register("price")} placeholder="$85" />
+          <Input 
+            id="price" 
+            {...register("price")} 
+            placeholder="$85" 
+            onChange={(e) => {
+              const value = e.target.value
+              if (!value.startsWith('$') && value) {
+                e.target.value = `$${value}`
+              }
+              register("price").onChange(e)
+            }}
+          />
           {errors.price && (
             <p className="text-sm text-destructive">{errors.price.message}</p>
           )}
@@ -254,29 +328,65 @@ export function ProductForm({ action, product, collections }: ProductFormProps) 
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="image">Product Image *</Label>
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <Input
-              id="image"
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              disabled={uploading}
-            />
-            {errors.image && (
-              <p className="text-sm text-destructive mt-1">{errors.image.message}</p>
-            )}
-            {uploading && <p className="text-sm text-muted-foreground mt-1">Uploading...</p>}
-          </div>
-          {imagePreview && (
-            <div className="relative w-24 h-24">
-              <Image
-                src={imagePreview}
-                alt="Preview"
-                fill
-                className="object-cover rounded"
+        <Label htmlFor="image">Product Images *</Label>
+        <div className="space-y-4">
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <Input
+                id="image"
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleImageChange}
+                disabled={uploading}
               />
+              {errors.image && (
+                <p className="text-sm text-destructive mt-1">{errors.image.message}</p>
+              )}
+              {uploading && <p className="text-sm text-muted-foreground mt-1">Uploading...</p>}
+            </div>
+          </div>
+          
+          {productImages.length > 0 && (
+            <div className="space-y-2">
+              <Label className="text-sm text-muted-foreground">Image Preview ({productImages.length} images)</Label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {productImages.map((imageUrl, index) => (
+                  <div key={index} className="relative group">
+                    <div className="relative aspect-square">
+                      <Image
+                        src={imageUrl}
+                        alt={`Preview ${index + 1}`}
+                        fill
+                        className="object-cover rounded border-2 transition-all"
+                        style={{
+                          borderColor: imageUrl === imagePreview ? 'hsl(var(--primary))' : 'hsl(var(--border))'
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <X size={12} />
+                      </button>
+                    </div>
+                    <div className="mt-1 flex gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setAsMainImage(imageUrl)}
+                        className={`text-xs px-2 py-1 rounded ${
+                          imageUrl === imagePreview
+                            ? 'bg-primary text-primary-foreground'
+                            : 'bg-secondary text-secondary-foreground'
+                        }`}
+                      >
+                        {imageUrl === imagePreview ? 'Main' : 'Set Main'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>

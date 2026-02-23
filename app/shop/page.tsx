@@ -13,7 +13,10 @@ export default async function ShopPage() {
     where: { isAvailable: true },
     include: { 
       collection: true,
-      dbCategory: true // Include the related category
+      dbCategory: true, // Include the related category
+      images: {
+        orderBy: { order: 'asc' }
+      }
     },
     orderBy: { createdAt: "desc" },
   })

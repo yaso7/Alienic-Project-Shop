@@ -28,12 +28,13 @@ interface Product {
   id: string
   name: string
   slug: string
-  categoryId: string
+  categoryId: string | null
   price: string
   collection?: { title: string } | null
   dbCategory?: { name: string } | null
   isFeatured: boolean
   isAvailable: boolean
+  images?: Array<{ id: string; imageUrl: string; order: number }>
 }
 
 interface Category {

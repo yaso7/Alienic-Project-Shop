@@ -20,10 +20,13 @@ export default async function NewProductPage() {
     const collectionId = formData.get("collectionId") as string
     const story = formData.get("story") as string
     const image = formData.get("image") as string
+    const images = formData.get("images") as string
     const isFeatured = formData.get("isFeatured") === "on"
     const isAvailable = formData.get("isAvailable") === "on"
 
-    await prisma.product.create({
+    const imageUrls = images ? JSON.parse(images) : [image]
+
+    const product = await prisma.product.create({
       data: {
         name,
         slug,
@@ -35,7 +38,16 @@ export default async function NewProductPage() {
         image,
         isFeatured,
         isAvailable,
+        images: {
+          create: imageUrls.map((url: string, index: number) => ({
+            imageUrl: url,
+            order: index,
+          }))
+        }
       },
+      include: {
+        images: true
+      }
     })
 
     // Revalidate cache for shop and home pages

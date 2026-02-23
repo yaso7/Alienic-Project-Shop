@@ -2,7 +2,8 @@
 
 import Image from "next/image"
 import { useState, useEffect } from "react"
-import { X, Instagram } from "lucide-react"
+import { X, Instagram, ChevronLeft, ChevronRight } from "lucide-react"
+import { ImageZoom } from "@/components/ui/image-zoom"
 
 interface Product {
   id: string
@@ -12,6 +13,7 @@ interface Product {
   collection: { title: string } | null
   story: string
   image: string
+  images?: Array<{ id: string; imageUrl: string; order: number }>
   dbCategory?: { name: string } | null
 }
 
@@ -24,6 +26,7 @@ interface ShopGridProps {
     collection: { title: string } | null
     story: string
     image: string
+    images?: Array<{ id: string; imageUrl: string; order: number }>
     dbCategory?: { name: string } | null
   }>
   categories: Array<{ id: string; name: string; slug: string }>
@@ -36,28 +39,101 @@ function ProductModal({
   product: Product
   onClose: () => void
 }) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  
+  const productImages = product.images?.map(img => img.imageUrl) || [product.image]
+  const currentImage = productImages[currentImageIndex]
+  
+  function nextImage() {
+    setCurrentImageIndex((prev) => (prev + 1) % productImages.length)
+  }
+  
+  function previousImage() {
+    setCurrentImageIndex((prev) => (prev - 1 + productImages.length) % productImages.length)
+  }
+  
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose()
+      }
+    }
+    
+    const handleArrowKeys = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') previousImage()
+      if (e.key === 'ArrowRight') nextImage()
+    }
+    
+    document.addEventListener('keydown', handleEsc)
+    document.addEventListener('keydown', handleArrowKeys)
+    
+    return () => {
+      document.removeEventListener('keydown', handleEsc)
+      document.removeEventListener('keydown', handleArrowKeys)
+    }
+  }, [onClose, productImages.length])
+  
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/90 backdrop-blur-sm">
-      <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-card border border-border">
+      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden bg-card border border-border">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 text-muted-foreground hover:text-foreground transition-colors"
+          className="absolute top-4 right-4 z-20 text-muted-foreground hover:text-foreground transition-colors bg-background/80 backdrop-blur-sm rounded-full p-2"
           aria-label="Close"
         >
           <X size={24} />
         </button>
 
-        <div className="grid grid-cols-1 md:grid-cols-2">
-          <div className="relative aspect-square">
-            <Image
-              src={product.image}
-              alt={product.name}
-              fill
-              className="object-cover"
-            />
+        <div className="grid grid-cols-1 lg:grid-cols-2 h-full">
+          <div className="relative">
+            <div className="relative aspect-square">
+              <ImageZoom
+                src={currentImage}
+                alt={product.name}
+                className="w-full h-full"
+              />
+              
+              {/* Navigation arrows */}
+              {productImages.length > 1 && (
+                <>
+                  <button
+                    onClick={previousImage}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm text-foreground rounded-full p-2 hover:bg-background/90 transition-colors z-20"
+                    aria-label="Previous image"
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <button
+                    onClick={nextImage}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm text-foreground rounded-full p-2 hover:bg-background/90 transition-colors z-20"
+                    aria-label="Next image"
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+                </>
+              )}
+              
+              {/* Image indicators */}
+              {productImages.length > 1 && (
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+                  {productImages.map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentImageIndex(index)}
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        index === currentImageIndex
+                          ? 'bg-primary'
+                          : 'bg-muted-foreground/50'
+                      }`}
+                      aria-label={`Go to image ${index + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="flex flex-col gap-4 p-8">
+          <div className="flex flex-col gap-4 p-8 overflow-y-auto">
             {product.collection && (
               <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">
                 {product.collection.title}
@@ -207,12 +283,17 @@ export function ShopGrid({ products, categories }: ShopGridProps) {
             >
               <div className="relative aspect-square overflow-hidden">
                 <Image
-                  src={product.image}
+                  src={product.images?.[0]?.imageUrl || product.image}
                   alt={product.name}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent opacity-60" />
+                {product.images && product.images.length > 1 && (
+                  <div className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm text-foreground text-xs px-2 py-1 rounded">
+                    +{product.images.length - 1} more
+                  </div>
+                )}
               </div>
               <div className="p-4 flex flex-col gap-1">
                 {product.collection && (

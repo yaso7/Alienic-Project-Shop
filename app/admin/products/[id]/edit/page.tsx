@@ -12,6 +12,11 @@ export default async function EditProductPage({
   const [product, collections] = await Promise.all([
     prisma.product.findUnique({
       where: { id },
+      include: {
+        images: {
+          orderBy: { order: 'asc' }
+        }
+      }
     }),
     prisma.collection.findMany({
       orderBy: { order: "asc" },
@@ -34,10 +39,19 @@ export default async function EditProductPage({
     const collectionId = formData.get("collectionId") as string
     const story = formData.get("story") as string
     const image = formData.get("image") as string
+    const images = formData.get("images") as string
     const isFeatured = formData.get("isFeatured") === "on"
     const isAvailable = formData.get("isAvailable") === "on"
 
-    await prisma.product.update({
+    const imageUrls = images ? JSON.parse(images) : [image]
+
+    // First, delete existing images
+    await prisma.productImage.deleteMany({
+      where: { productId: id }
+    })
+
+    // Then update product and create new images
+    const updatedProduct = await prisma.product.update({
       where: { id },
       data: {
         name,
@@ -50,7 +64,18 @@ export default async function EditProductPage({
         image,
         isFeatured,
         isAvailable,
+        images: {
+          create: imageUrls.map((url: string, index: number) => ({
+            imageUrl: url,
+            order: index,
+          }))
+        }
       },
+      include: {
+        images: {
+          orderBy: { order: 'asc' }
+        }
+      }
     })
 
     // Revalidate cache for shop and home pages
@@ -68,7 +93,10 @@ export default async function EditProductPage({
         </h1>
       </div>
 
-      <ProductForm action={updateProduct} product={product} collections={collections} />
+      <ProductForm action={updateProduct} product={{
+    ...product,
+    images: product.images.map(img => img.imageUrl)
+  }} collections={collections} />
     </div>
   )
 }
