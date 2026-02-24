@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { format } from 'date-fns'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -30,10 +31,13 @@ interface Product {
   slug: string
   categoryId: string | null
   price: string
+  priceNumeric: number
   collection?: { title: string } | null
   dbCategory?: { name: string } | null
   isFeatured: boolean
   isAvailable: boolean
+  createdAt: Date
+  updatedAt: Date
   images?: Array<{ id: string; imageUrl: string; order: number }>
 }
 
@@ -59,6 +63,8 @@ export default function ProductsPage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
+  const [sortBy, setSortBy] = useState('createdAt')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const pageSize = 10
 
   console.log('Products page state:', { products: products.length, total, page, pageSize }) // Debug log
@@ -66,7 +72,7 @@ export default function ProductsPage() {
   useEffect(() => {
     fetchProducts()
     fetchCategories()
-  }, [search, status, category, page])
+  }, [search, status, category, page, sortBy, sortOrder])
 
   async function fetchCategories() {
     try {
@@ -89,6 +95,8 @@ export default function ProductsPage() {
         pageSize: pageSize.toString(),
         ...(status && status !== 'all' && { status }),
         ...(category && category !== 'all' && { categoryId: category }),
+        sortBy,
+        sortOrder,
       })
       const response = await fetch(`/api/admin/products?${params}`)
       if (response.ok) {
@@ -102,6 +110,16 @@ export default function ProductsPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortBy(field)
+      setSortOrder('asc')
+    }
+    setPage(1)
   }
 
   const handleResetFilters = () => {
@@ -199,11 +217,41 @@ export default function ProductsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
+                  <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort('name')}>
+                    <div className="flex items-center gap-1">
+                      Name
+                      <span className="text-xs text-muted-foreground">
+                        {sortBy === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                      </span>
+                    </div>
+                  </TableHead>
                   <TableHead>Category</TableHead>
-                  <TableHead>Price</TableHead>
+                  <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort('price')}>
+                    <div className="flex items-center gap-1">
+                      Price
+                      <span className="text-xs text-muted-foreground">
+                        {sortBy === 'price' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                      </span>
+                    </div>
+                  </TableHead>
                   <TableHead>Collection</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort('createdAt')}>
+                    <div className="flex items-center gap-1">
+                      Created
+                      <span className="text-xs text-muted-foreground">
+                        {sortBy === 'createdAt' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                      </span>
+                    </div>
+                  </TableHead>
+                  <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort('updatedAt')}>
+                    <div className="flex items-center gap-1">
+                      Updated
+                      <span className="text-xs text-muted-foreground">
+                        {sortBy === 'updatedAt' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                      </span>
+                    </div>
+                  </TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -216,7 +264,7 @@ export default function ProductsPage() {
                         {product.dbCategory?.name || '-'}
                       </Badge>
                     </TableCell>
-                    <TableCell>{product.price}</TableCell>
+                    <TableCell>${product.priceNumeric?.toFixed(2) || '0.00'}</TableCell>
                     <TableCell className="text-muted-foreground">
                       {product.collection?.title || '-'}
                     </TableCell>
@@ -235,6 +283,12 @@ export default function ProductsPage() {
                           </Badge>
                         )}
                       </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {format(new Date(product.createdAt), 'MMM d, yyyy')}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {format(new Date(product.updatedAt), 'MMM d, yyyy')}
                     </TableCell>
                     <TableCell className="text-right">
                       <ProductActions 

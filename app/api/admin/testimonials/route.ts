@@ -11,6 +11,8 @@ export async function GET(request: Request) {
     const page = parseInt(url.searchParams.get('page') || '1')
     const pageSize = parseInt(url.searchParams.get('pageSize') || '10')
     const status = url.searchParams.get('status') // Pending, Approved, Rejected
+    const sortBy = url.searchParams.get('sortBy') || 'createdAt'
+    const sortOrder = url.searchParams.get('sortOrder') || 'desc'
 
     const skip = (page - 1) * pageSize
 
@@ -28,13 +30,17 @@ export async function GET(request: Request) {
       where.status = status
     }
 
+    // Build orderBy object
+    const orderBy: any = {}
+    orderBy[sortBy] = sortOrder
+
     const [testimonials, total] = await Promise.all([
       prisma.testimonial.findMany({
         where,
         include: { 
           image: true,
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy,
         skip,
         take: pageSize,
       }),

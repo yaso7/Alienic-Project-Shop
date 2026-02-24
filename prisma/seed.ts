@@ -143,9 +143,9 @@ async function main() {
     data: {
       slug: "the-void-pendant",
       name: "The Void Pendant",
-      category: "Pendant",
       categoryId: categories.pendant.id,
       price: "$85",
+      priceNumeric: 85,
       material: "Oxidized Sterling Silver",
       collectionId: oxidizedRelics.id,
       story:
@@ -161,9 +161,9 @@ async function main() {
     data: {
       slug: "stellar-fragment-ring",
       name: "Stellar Fragment Ring",
-      category: "Ring",
       categoryId: categories.ring.id,
       price: "$120",
+      priceNumeric: 120,
       material: "Matte Black Steel",
       collectionId: voidGeometry.id,
       story:
@@ -179,9 +179,9 @@ async function main() {
     data: {
       slug: "the-beacon",
       name: "The Beacon",
-      category: "Pendant",
       categoryId: categories.pendant.id,
       price: "$95",
+      priceNumeric: 95,
       material: "Brushed Silver, Black Cord",
       collectionId: matteShadows.id,
       story:
@@ -197,9 +197,9 @@ async function main() {
     data: {
       slug: "chain-of-whispers",
       name: "Chain of Whispers",
-      category: "Chain",
       categoryId: categories.chain.id,
       price: "$65",
+      priceNumeric: 65,
       material: "Oxidized Silver Links",
       collectionId: oxidizedRelics.id,
       story:
@@ -215,9 +215,9 @@ async function main() {
     data: {
       slug: "relic-of-the-fallen-star",
       name: "Relic of the Fallen Star",
-      category: "OneOfOne",
       categoryId: categories.oneOfOne.id,
       price: "$250",
+      priceNumeric: 250,
       material: "Mixed Metals, Meteorite Fragment",
       collectionId: stellarFragments.id,
       story:
@@ -233,9 +233,9 @@ async function main() {
     data: {
       slug: "obsidian-band",
       name: "Obsidian Band",
-      category: "Ring",
       categoryId: categories.ring.id,
       price: "$90",
+      priceNumeric: 90,
       material: "Matte Black Titanium",
       collectionId: matteShadows.id,
       story:
@@ -252,9 +252,9 @@ async function main() {
     data: {
       slug: "eclipse-pendant",
       name: "Eclipse Pendant",
-      category: "Pendant",
       categoryId: categories.pendant.id,
       price: "$110",
+      priceNumeric: 110,
       material: "Oxidized Silver with Moonstone",
       collectionId: stellarFragments.id,
       story:
@@ -270,9 +270,9 @@ async function main() {
     data: {
       slug: "void-chain",
       name: "Void Chain",
-      category: "Chain",
       categoryId: categories.chain.id,
       price: "$75",
+      priceNumeric: 75,
       material: "Matte Black Steel Links",
       collectionId: voidGeometry.id,
       story:
@@ -295,7 +295,6 @@ async function main() {
       location: "Berlin, Germany",
       rating: 5,
       text: "The piece arrived wrapped in black tissue like a relic from another world. It carries a weight that goes beyond the physical — you can feel the intention in every curve and edge.",
-      productId: voidPendant.id,
       source: "Manual",
       status: "Approved",
     },
@@ -307,7 +306,6 @@ async function main() {
       location: "Portland, USA",
       rating: 5,
       text: "I've never owned anything that felt so deliberately crafted. The oxidation gives it this living quality, like it's still transforming. Absolutely transcendent work.",
-      productId: chainOfWhispers.id,
       source: "Manual",
       status: "Approved",
     },
@@ -319,7 +317,6 @@ async function main() {
       location: "Stockholm, Sweden",
       rating: 5,
       text: "More than jewelry — it's a conversation piece that speaks without words. Strangers stop me to ask about it. It feels like wearing a secret.",
-      productId: stellarRing.id,
       source: "Manual",
       status: "Approved",
     },
@@ -331,7 +328,6 @@ async function main() {
       location: "Moscow, Russia",
       rating: 4,
       text: "The craftsmanship is undeniable. Each surface tells a story of the hands that shaped it. This is what happens when art refuses to be mass-produced.",
-      productId: beacon.id,
       source: "Manual",
       status: "Approved",
     },
@@ -343,7 +339,6 @@ async function main() {
       location: "Tokyo, Japan",
       rating: 5,
       text: "I commissioned a custom piece and the entire process felt sacred — from the initial conversation to the moment I unwrapped it. It's become my most treasured possession.",
-      productId: null,
       source: "Manual",
       status: "Approved",
     },
@@ -355,7 +350,6 @@ async function main() {
       location: "Buenos Aires, Argentina",
       rating: 5,
       text: "The Relic of the Fallen Star is extraordinary. Knowing there's actual meteorite in the piece makes it feel like I'm carrying a fragment of the universe. Incomparable artistry.",
-      productId: relicOfFallenStar.id,
       source: "Manual",
       status: "Approved",
     },
@@ -368,7 +362,6 @@ async function main() {
       location: "London, UK",
       rating: 5,
       text: "Absolutely stunning piece. The attention to detail is remarkable. Can't wait to add more to my collection.",
-      productId: eclipsePendant.id,
       source: "Form",
       status: "Pending",
     },
@@ -380,7 +373,6 @@ async function main() {
       location: "Barcelona, Spain",
       rating: 5,
       text: "The Void Chain is everything I hoped for and more. It's become a daily essential — I feel incomplete without it.",
-      productId: voidChain.id,
       source: "Form",
       status: "Pending",
     },

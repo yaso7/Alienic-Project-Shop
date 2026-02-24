@@ -16,6 +16,7 @@ export default async function NewProductPage() {
     const slug = formData.get("slug") as string
     const categoryId = formData.get("categoryId") as string
     const price = formData.get("price") as string
+    const priceNumeric = parseFloat(price.replace(/[^0-9.]/g, '')) || 0
     const material = formData.get("material") as string
     const collectionId = formData.get("collectionId") as string
     const story = formData.get("story") as string
@@ -32,6 +33,7 @@ export default async function NewProductPage() {
         slug,
         categoryId: categoryId || null,
         price,
+        priceNumeric,
         material,
         collectionId: collectionId || null,
         story,

@@ -38,11 +38,13 @@ export default function CategoriesPage() {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
+  const [sortBy, setSortBy] = useState('createdAt')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const pageSize = 10
 
   useEffect(() => {
     fetchCategories()
-  }, [search, page])
+  }, [search, page, sortBy, sortOrder])
 
   async function fetchCategories() {
     setLoading(true)
@@ -51,6 +53,8 @@ export default function CategoriesPage() {
         search,
         page: page.toString(),
         pageSize: pageSize.toString(),
+        sortBy,
+        sortOrder,
       })
       const response = await fetch(`/api/admin/categories?${params}`)
       if (response.ok) {
@@ -63,6 +67,16 @@ export default function CategoriesPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortBy(field)
+      setSortOrder('asc')
+    }
+    setPage(1)
   }
 
   const handleSuccess = () => {
@@ -122,10 +136,31 @@ export default function CategoriesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Slug</TableHead>
+                  <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort('name')}>
+                    <div className="flex items-center gap-1">
+                      Name
+                      <span className="text-xs text-muted-foreground">
+                        {sortBy === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                      </span>
+                    </div>
+                  </TableHead>
+                  <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort('slug')}>
+                    <div className="flex items-center gap-1">
+                      Slug
+                      <span className="text-xs text-muted-foreground">
+                        {sortBy === 'slug' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                      </span>
+                    </div>
+                  </TableHead>
                   <TableHead>Description</TableHead>
-                  <TableHead>Created</TableHead>
+                  <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort('createdAt')}>
+                    <div className="flex items-center gap-1">
+                      Created
+                      <span className="text-xs text-muted-foreground">
+                        {sortBy === 'createdAt' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                      </span>
+                    </div>
+                  </TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>

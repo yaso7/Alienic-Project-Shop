@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { format } from 'date-fns'
 import { Plus, Edit, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -24,6 +25,7 @@ interface Collection {
   description: string
   mood: string[]
   order: number
+  createdAt: Date
 }
 
 interface PaginatedResponse {
@@ -39,11 +41,13 @@ export default function CollectionsPage() {
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
+  const [sortBy, setSortBy] = useState('order')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const pageSize = 10
 
   useEffect(() => {
     fetchCollections()
-  }, [search, page])
+  }, [search, page, sortBy, sortOrder])
 
   async function fetchCollections() {
     setLoading(true)
@@ -52,6 +56,8 @@ export default function CollectionsPage() {
         search,
         page: page.toString(),
         pageSize: pageSize.toString(),
+        sortBy,
+        sortOrder,
       })
       const response = await fetch(`/api/admin/collections?${params}`)
       if (response.ok) {
@@ -64,6 +70,16 @@ export default function CollectionsPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortBy(field)
+      setSortOrder('asc')
+    }
+    setPage(1)
   }
 
   const handleResetFilters = () => {
@@ -130,10 +146,32 @@ export default function CollectionsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Title</TableHead>
+                  <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort('title')}>
+                    <div className="flex items-center gap-1">
+                      Title
+                      <span className="text-xs text-muted-foreground">
+                        {sortBy === 'title' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                      </span>
+                    </div>
+                  </TableHead>
                   <TableHead>Subtitle</TableHead>
-                  <TableHead>Order</TableHead>
+                  <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort('order')}>
+                    <div className="flex items-center gap-1">
+                      Order
+                      <span className="text-xs text-muted-foreground">
+                        {sortBy === 'order' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                      </span>
+                    </div>
+                  </TableHead>
                   <TableHead>Mood</TableHead>
+                  <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort('createdAt')}>
+                    <div className="flex items-center gap-1">
+                      Created
+                      <span className="text-xs text-muted-foreground">
+                        {sortBy === 'createdAt' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                      </span>
+                    </div>
+                  </TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -151,6 +189,9 @@ export default function CollectionsPage() {
                           {m}
                         </span>
                       ))}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {format(new Date(collection.createdAt), 'MMM d, yyyy')}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">

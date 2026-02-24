@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import {
   Table,
@@ -32,6 +33,7 @@ interface Testimonial {
   pieceAcquired: string | null
   status: string
   hasMedia: boolean
+  createdAt: Date
   image?: {
     id: string
     url: string
@@ -55,11 +57,13 @@ export default function TestimonialsPage() {
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
   const [statusCounts, setStatusCounts] = useState({ pending: 0, approved: 0, rejected: 0 })
+  const [sortBy, setSortBy] = useState('createdAt')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const pageSize = 10
 
   useEffect(() => {
     fetchTestimonials()
-  }, [search, status, page])
+  }, [search, status, page, sortBy, sortOrder])
 
   async function fetchTestimonials() {
     setLoading(true)
@@ -69,6 +73,8 @@ export default function TestimonialsPage() {
         page: page.toString(),
         pageSize: pageSize.toString(),
         ...(status && status !== 'all' && { status }),
+        sortBy,
+        sortOrder,
       })
       const response = await fetch(`/api/admin/testimonials?${params}`)
       if (response.ok) {
@@ -103,6 +109,16 @@ export default function TestimonialsPage() {
     }
     fetchStatusCounts()
   }, [])
+
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortBy(field)
+      setSortOrder('asc')
+    }
+    setPage(1)
+  }
 
   const handleResetFilters = () => {
     setSearch('')
@@ -179,12 +195,34 @@ export default function TestimonialsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Rating</TableHead>
+                  <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort('name')}>
+                    <div className="flex items-center gap-1">
+                      Name
+                      <span className="text-xs text-muted-foreground">
+                        {sortBy === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                      </span>
+                    </div>
+                  </TableHead>
+                  <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort('rating')}>
+                    <div className="flex items-center gap-1">
+                      Rating
+                      <span className="text-xs text-muted-foreground">
+                        {sortBy === 'rating' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                      </span>
+                    </div>
+                  </TableHead>
                   <TableHead>Piece</TableHead>
                   <TableHead>Text</TableHead>
                   <TableHead>Media</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort('createdAt')}>
+                    <div className="flex items-center gap-1">
+                      Created
+                      <span className="text-xs text-muted-foreground">
+                        {sortBy === 'createdAt' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                      </span>
+                    </div>
+                  </TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -243,6 +281,9 @@ export default function TestimonialsPage() {
                       >
                         {testimonial.status}
                       </Badge>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {format(new Date(testimonial.createdAt), 'MMM d, yyyy')}
                     </TableCell>
                     <TableCell className="text-right">
                       <TestimonialActions testimonial={testimonial} />

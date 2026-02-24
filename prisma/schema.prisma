@@ -40,6 +40,7 @@ model Product {
   slug         String          @unique
   name         String
   price        String
+  priceNumeric Float
   material     String
   collectionId String?
   story        String

@@ -57,11 +57,13 @@ export default function MessagesPage() {
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(0)
   const [statusCounts, setStatusCounts] = useState({ new: 0, read: 0, archived: 0 })
+  const [sortBy, setSortBy] = useState('createdAt')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const pageSize = 10
 
   useEffect(() => {
     fetchMessages()
-  }, [search, status, page])
+  }, [search, status, page, sortBy, sortOrder])
 
   async function fetchMessages() {
     setLoading(true)
@@ -71,6 +73,8 @@ export default function MessagesPage() {
         page: page.toString(),
         pageSize: pageSize.toString(),
         ...(status && status !== 'all' && { status }),
+        sortBy,
+        sortOrder,
       })
       const response = await fetch(`/api/admin/messages?${params}`)
       if (response.ok) {
@@ -105,6 +109,16 @@ export default function MessagesPage() {
     }
     fetchStatusCounts()
   }, [])
+
+  const handleSort = (field: string) => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortBy(field)
+      setSortOrder('asc')
+    }
+    setPage(1)
+  }
 
   const handleResetFilters = () => {
     setSearch('')
@@ -179,11 +193,39 @@ export default function MessagesPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Subject</TableHead>
+                  <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort('name')}>
+                    <div className="flex items-center gap-1">
+                      Name
+                      <span className="text-xs text-muted-foreground">
+                        {sortBy === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                      </span>
+                    </div>
+                  </TableHead>
+                  <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort('email')}>
+                    <div className="flex items-center gap-1">
+                      Email
+                      <span className="text-xs text-muted-foreground">
+                        {sortBy === 'email' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                      </span>
+                    </div>
+                  </TableHead>
+                  <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort('subject')}>
+                    <div className="flex items-center gap-1">
+                      Subject
+                      <span className="text-xs text-muted-foreground">
+                        {sortBy === 'subject' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                      </span>
+                    </div>
+                  </TableHead>
                   <TableHead>Message</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort('createdAt')}>
+                    <div className="flex items-center gap-1">
+                      Date
+                      <span className="text-xs text-muted-foreground">
+                        {sortBy === 'createdAt' ? (sortOrder === 'asc' ? '↑' : '↓') : '↕'}
+                      </span>
+                    </div>
+                  </TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>

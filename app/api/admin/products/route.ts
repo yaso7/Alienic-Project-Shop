@@ -12,6 +12,8 @@ export async function GET(request: Request) {
     const pageSize = parseInt(url.searchParams.get('pageSize') || '10')
     const status = url.searchParams.get('status') // available, unavailable, featured
     const categoryId = url.searchParams.get('categoryId')
+    const sortBy = url.searchParams.get('sortBy') || 'createdAt'
+    const sortOrder = url.searchParams.get('sortOrder') || 'desc'
 
     const skip = (page - 1) * pageSize
 
@@ -37,6 +39,16 @@ export async function GET(request: Request) {
       where.categoryId = categoryId
     }
 
+    // Build orderBy object
+    const orderBy: any = {}
+    
+    // Handle price sorting specially
+    if (sortBy === 'price') {
+      orderBy.priceNumeric = sortOrder
+    } else {
+      orderBy[sortBy] = sortOrder
+    }
+
     const [products, total] = await Promise.all([
       prisma.product.findMany({
         where,
@@ -47,7 +59,7 @@ export async function GET(request: Request) {
             orderBy: { order: 'asc' }
           }
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy,
         skip,
         take: pageSize,
       }),

@@ -11,6 +11,8 @@ export async function GET(request: Request) {
     const search = url.searchParams.get('search') || ''
     const page = parseInt(url.searchParams.get('page') || '1')
     const pageSize = parseInt(url.searchParams.get('pageSize') || '10')
+    const sortBy = url.searchParams.get('sortBy') || 'order'
+    const sortOrder = url.searchParams.get('sortOrder') || 'asc'
 
     const skip = (page - 1) * pageSize
 
@@ -24,10 +26,14 @@ export async function GET(request: Request) {
       ]
     }
 
+    // Build orderBy object
+    const orderBy: any = {}
+    orderBy[sortBy] = sortOrder
+
     const [collections, total] = await Promise.all([
       prisma.collection.findMany({
         where,
-        orderBy: { order: 'asc' },
+        orderBy,
         skip,
         take: pageSize,
       }),
