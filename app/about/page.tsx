@@ -35,13 +35,14 @@ export default function AboutPage() {
       <section className="relative py-24 md:py-32 px-6 noise-bg">
         <div className="mx-auto max-w-5xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div className="relative aspect-[3/4] overflow-hidden">
-              <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1.Sticker-%20Logo-zkFcGsmctG92tbpbE9EKeUL5Jrkz5d.png"
-                alt="Alienic Project logo - white star and gothic text on black"
-                fill
+            <div className="relative aspect-[9/16] overflow-hidden">
+              <video
+                src="https://a7waintojpncbj2p.public.blob.vercel-storage.com/first%20story.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
                 className="object-cover"
-                priority
               />
             </div>
 
