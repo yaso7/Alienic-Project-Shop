@@ -75,7 +75,7 @@ function ProductModal({
   
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/90 backdrop-blur-sm">
-      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden bg-card border border-border">
+      <div className="relative w-full max-w-4xl max-h-[90vh] lg:overflow-hidden overflow-y-auto bg-card border border-border">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 z-20 text-muted-foreground hover:text-foreground transition-colors bg-background/80 backdrop-blur-sm rounded-full p-2"
@@ -84,9 +84,9 @@ function ProductModal({
           <X size={24} />
         </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 h-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 lg:h-full">
           <div className="relative">
-            <div className="relative aspect-[9/16]">
+            <div className="relative aspect-[9/16] lg:aspect-[4/5]">
               <ImageZoom
                 src={currentImage}
                 alt={product.name}
@@ -133,7 +133,7 @@ function ProductModal({
             </div>
           </div>
 
-          <div className="flex flex-col gap-4 p-8 overflow-y-auto">
+          <div className="flex flex-col gap-4 p-8 lg:overflow-y-auto">
             {product.collection && (
               <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">
                 {product.collection.title}

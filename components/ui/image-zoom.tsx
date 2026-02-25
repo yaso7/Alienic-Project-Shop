@@ -20,8 +20,21 @@ export function ImageZoom({
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 })
   const containerRef = useRef<HTMLDivElement>(null)
 
+  // Disable zoom on mobile devices
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024) // lg breakpoint
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!containerRef.current) return
+    if (isMobile || !containerRef.current) return
 
     const rect = containerRef.current.getBoundingClientRect()
     const x = e.clientX - rect.left
@@ -34,11 +47,15 @@ export function ImageZoom({
   }
 
   const handleMouseEnter = () => {
-    setIsZoomed(true)
+    if (!isMobile) {
+      setIsZoomed(true)
+    }
   }
 
   const handleMouseLeave = () => {
-    setIsZoomed(false)
+    if (!isMobile) {
+      setIsZoomed(false)
+    }
   }
 
   return (
@@ -57,8 +74,8 @@ export function ImageZoom({
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
       />
       
-      {/* Zoom overlay */}
-      {isZoomed && (
+      {/* Zoom overlay - only on desktop */}
+      {!isMobile && isZoomed && (
         <div 
           className="absolute inset-0 pointer-events-none z-10"
           style={{
