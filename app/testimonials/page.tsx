@@ -85,11 +85,11 @@ export default function TestimonialsPage() {
             <p className="text-muted-foreground">No testimonials available yet.</p>
           </div>
         ) : (
-          <div className="mx-auto max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="mx-auto max-w-5xl columns-1 md:columns-2 gap-8">
             {testimonials.map((testimonial) => (
               <div
                 key={testimonial.id}
-                className="flex flex-col gap-4 p-8 bg-card border border-border hover:border-primary/20 transition-all duration-500"
+                className="break-inside-avoid mb-8 flex flex-col gap-4 p-8 bg-card border border-border hover:border-primary/20 transition-all duration-500"
               >
                 <div className="flex gap-1">
                   {Array.from({ length: 5 }).map((_, i) => (

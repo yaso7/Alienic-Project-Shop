@@ -91,6 +91,7 @@ model Testimonial {
   pieceAcquired String?
   source       TestimonialSource @default(Form)
   status       TestimonialStatus @default(Pending)
+  showOnHomepage Boolean          @default(false)
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
   imageId      String?           @unique

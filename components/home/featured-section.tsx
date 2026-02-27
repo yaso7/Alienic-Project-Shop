@@ -23,34 +23,42 @@ export async function FeaturedSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {collections.map((collection) => (
-            <Link
-              key={collection.title}
-              href="/projects"
-              className="group relative overflow-hidden aspect-[3/4] bg-card"
-            >
-              <Image
-                src={collection.heroImage}
-                alt={collection.title}
-                fill
-                className="object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-700"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6 flex flex-col gap-2">
-                <p className="text-xs uppercase tracking-[0.2em] text-primary">
-                  {collection.mood.join(" / ")}
-                </p>
-                <h3 className="main-title text-2xl text-foreground">
-                  {collection.title}
-                </h3>
-                <p className="text-lg text-muted-foreground">
-                  {collection.shortDescription || collection.description}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
+        {collections.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {collections.map((collection) => (
+              <Link
+                key={collection.title}
+                href="/projects"
+                className="group relative overflow-hidden aspect-[3/4] bg-card"
+              >
+                <Image
+                  src={collection.heroImage}
+                  alt={collection.title}
+                  fill
+                  className="object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-6 flex flex-col gap-2">
+                  <p className="text-xs uppercase tracking-[0.2em] text-primary">
+                    {collection.mood.join(" / ")}
+                  </p>
+                  <h3 className="main-title text-2xl text-foreground">
+                    {collection.title}
+                  </h3>
+                  <p className="text-lg text-muted-foreground">
+                    {collection.shortDescription || collection.description}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-16">
+            <p className="main-title text-2xl md:text-3xl text-muted-foreground">
+              Coming Soon
+            </p>
+          </div>
+        )}
 
         <div className="text-center mt-12">
           <Link

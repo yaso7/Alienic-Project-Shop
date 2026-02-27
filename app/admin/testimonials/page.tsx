@@ -32,6 +32,7 @@ interface Testimonial {
   text: string
   pieceAcquired: string | null
   status: string
+  showOnHomepage: boolean
   hasMedia: boolean
   createdAt: Date
   image?: {
@@ -126,6 +127,30 @@ export default function TestimonialsPage() {
     setPage(1)
   }
 
+  const updateShowOnHomepage = async (id: string, showOnHomepage: boolean) => {
+    try {
+      const res = await fetch(`/api/admin/testimonials/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ showOnHomepage }),
+      })
+
+      if (res.ok) {
+        // Update the local state to reflect the change
+        setTestimonials(prev => 
+          prev.map(t => t.id === id ? { ...t, showOnHomepage } : t)
+        )
+      } else {
+        const errorData = await res.json().catch(() => ({}))
+        console.error('Update failed:', errorData)
+        alert(`Failed to update testimonial: ${errorData.error || 'Unknown error'}`)
+      }
+    } catch (error) {
+      console.error('Network error:', error)
+      alert('Failed to update testimonial: Network error')
+    }
+  }
+
   if (loading && testimonials.length === 0) {
     return <div className="text-center py-12">Loading...</div>
   }
@@ -214,6 +239,7 @@ export default function TestimonialsPage() {
                   <TableHead>Piece</TableHead>
                   <TableHead>Text</TableHead>
                   <TableHead>Media</TableHead>
+                  <TableHead>Show on Home</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort('createdAt')}>
                     <div className="flex items-center gap-1">
@@ -267,6 +293,14 @@ export default function TestimonialsPage() {
                       >
                         {testimonial.hasMedia ? "Yes" : "No"}
                       </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <input
+                        type="checkbox"
+                        checked={testimonial.showOnHomepage}
+                        onChange={(e) => updateShowOnHomepage(testimonial.id, e.target.checked)}
+                        className="w-4 h-4 text-primary border-border rounded focus:ring-primary focus:ring-2"
+                      />
                     </TableCell>
                     <TableCell>
                       <Badge

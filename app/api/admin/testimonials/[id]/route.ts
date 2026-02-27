@@ -11,14 +11,24 @@ export async function PATCH(
     await requireAuth()
     const { id } = await params
     const body = await request.json()
-    const { status } = body
+    const { status, showOnHomepage } = body
 
-    console.log("Updating testimonial:", { id, status })
+    console.log("Updating testimonial:", { id, status, showOnHomepage })
 
-    if (!status || !["Approved", "Rejected", "Pending"].includes(status)) {
+    // Validate status if provided
+    if (status && !["Approved", "Rejected", "Pending"].includes(status)) {
       console.log("Invalid status:", status)
       return NextResponse.json(
         { error: "Invalid status" },
+        { status: 400 }
+      )
+    }
+
+    // Validate showOnHomepage if provided
+    if (showOnHomepage !== undefined && typeof showOnHomepage !== 'boolean') {
+      console.log("Invalid showOnHomepage:", showOnHomepage)
+      return NextResponse.json(
+        { error: "showOnHomepage must be a boolean" },
         { status: 400 }
       )
     }
@@ -36,9 +46,14 @@ export async function PATCH(
       )
     }
 
+    // Build update data object
+    const updateData: any = {}
+    if (status) updateData.status = status as any
+    if (showOnHomepage !== undefined) updateData.showOnHomepage = showOnHomepage
+
     const updatedTestimonial = await prisma.testimonial.update({
       where: { id },
-      data: { status: status as any },
+      data: updateData,
     })
     
     console.log("Successfully updated testimonial:", updatedTestimonial.id)
