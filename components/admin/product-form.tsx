@@ -18,7 +18,7 @@ import { Switch } from "@/components/ui/switch"
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import Image from "next/image"
-import { X, Plus } from "lucide-react"
+import { X, Plus, Glasses } from "lucide-react"
 
 const productSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -32,6 +32,8 @@ const productSchema = z.object({
   images: z.array(z.string()).optional(),
   isFeatured: z.boolean().default(false),
   isAvailable: z.boolean().default(true),
+  madeBy: z.string().optional(),
+  addedBy: z.string().optional(),
 })
 
 type ProductFormData = z.infer<typeof productSchema>
@@ -41,6 +43,11 @@ interface Category {
   name: string
   slug: string
   description?: string
+}
+
+interface Admin {
+  id: string
+  email: string
 }
 
 interface ProductFormProps {
@@ -57,13 +64,18 @@ interface ProductFormProps {
     images?: string[]
     isFeatured: boolean
     isAvailable: boolean
+    madeBy?: string | null
+    addedBy?: string | null
   }
   collections: Array<{ id: string; title: string }>
+  currentAdminId?: string
 }
 
-export function ProductForm({ action, product, collections }: ProductFormProps) {
+export function ProductForm({ action, product, collections, currentAdminId }: ProductFormProps) {
   const [categories, setCategories] = useState<Category[]>([])
+  const [admins, setAdmins] = useState<Admin[]>([])
   const [loadingCategories, setLoadingCategories] = useState(true)
+  const [loadingAdmins, setLoadingAdmins] = useState(true)
   const [productImages, setProductImages] = useState<string[]>(product?.images || (product?.image ? [product.image] : []))
   const [uploading, setUploading] = useState(false)
   
@@ -87,10 +99,13 @@ export function ProductForm({ action, product, collections }: ProductFormProps) 
           image: product.image,
           isFeatured: product.isFeatured,
           isAvailable: product.isAvailable,
+          madeBy: product.madeBy || "",
+          addedBy: product.addedBy || "",
         }
       : {
           categoryId: "",
           isAvailable: true,
+          addedBy: currentAdminId || "",
         },
   })
 
@@ -109,7 +124,22 @@ export function ProductForm({ action, product, collections }: ProductFormProps) 
       }
     }
 
+    async function fetchAdmins() {
+      try {
+        const response = await fetch('/api/admin/admins')
+        if (response.ok) {
+          const data = await response.json()
+          setAdmins(data.admins || [])
+        }
+      } catch (error) {
+        console.error('Failed to fetch admins:', error)
+      } finally {
+        setLoadingAdmins(false)
+      }
+    }
+
     fetchCategories()
+    fetchAdmins()
   }, [])
 
   // Auto-generate slug from name
@@ -212,6 +242,8 @@ export function ProductForm({ action, product, collections }: ProductFormProps) 
     formData.append("images", JSON.stringify(productImages))
     formData.append("isFeatured", data.isFeatured ? "on" : "")
     formData.append("isAvailable", data.isAvailable ? "on" : "")
+    formData.append("madeBy", data.madeBy || "")
+    formData.append("addedBy", data.addedBy || currentAdminId || "")
     await action(formData)
   }
 
@@ -292,6 +324,46 @@ export function ProductForm({ action, product, collections }: ProductFormProps) 
         <Input id="material" {...register("material")} placeholder="Oxidized Sterling Silver" />
         {errors.material && (
           <p className="text-sm text-destructive">{errors.material.message}</p>
+        )}
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="madeBy">Made By</Label>
+          <Select
+            value={watch("madeBy") || ""}
+            onValueChange={(value) => setValue("madeBy", value || undefined)}
+            disabled={loadingAdmins}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder={loadingAdmins ? "Loading admins..." : "Select admin (optional)"} />
+            </SelectTrigger>
+            <SelectContent>
+              {admins.map((admin) => (
+                <SelectItem key={admin.id} value={admin.id}>
+                  {admin.email}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {loadingAdmins && (
+            <p className="text-sm text-muted-foreground">Loading admins...</p>
+          )}
+          <p className="text-sm text-muted-foreground">Jamie is watching.. <Glasses className="inline h-3 w-3 ml-1" /></p>
+        </div>
+
+        {!product && (
+          <div className="space-y-2">
+            <Label htmlFor="addedBy">Added By</Label>
+            <Input
+              id="addedBy"
+              {...register("addedBy")}
+              value={currentAdminId ? admins.find(a => a.id === currentAdminId)?.email || currentAdminId : ""}
+              disabled
+              className="bg-muted"
+            />
+            <p className="text-sm text-muted-foreground">Automatically set to current admin</p>
+          </div>
         )}
       </div>
 

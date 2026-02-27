@@ -2,8 +2,10 @@ import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { ProductForm } from "@/components/admin/product-form"
 import { revalidatePath } from "next/cache"
+import { getCurrentAdmin } from "@/lib/auth"
 
 export default async function NewProductPage() {
+  const currentAdmin = await getCurrentAdmin()
   const collections = await prisma.collection.findMany({
     orderBy: { order: "asc" },
   })
@@ -24,6 +26,8 @@ export default async function NewProductPage() {
     const images = formData.get("images") as string
     const isFeatured = formData.get("isFeatured") === "on"
     const isAvailable = formData.get("isAvailable") === "on"
+    const madeBy = formData.get("madeBy") as string
+    const addedBy = formData.get("addedBy") as string
 
     const imageUrls = images ? JSON.parse(images) : [image]
 
@@ -40,6 +44,8 @@ export default async function NewProductPage() {
         image,
         isFeatured,
         isAvailable,
+        madeBy: madeBy || null,
+        addedBy: addedBy || null,
         images: {
           create: imageUrls.map((url: string, index: number) => ({
             imageUrl: url,
@@ -67,7 +73,7 @@ export default async function NewProductPage() {
         </h1>
       </div>
 
-      <ProductForm action={createProduct} collections={collections} />
+      <ProductForm action={createProduct} collections={collections} currentAdminId={currentAdmin?.id} />
     </div>
   )
 }

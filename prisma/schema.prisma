@@ -14,6 +14,8 @@ model AdminUser {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   sessions       Session[]
+  madeProducts   Product[] @relation("ProductMadeBy")
+  addedProducts  Product[] @relation("ProductAddedBy")
 
   @@map("admin_users")
 }
@@ -50,9 +52,14 @@ model Product {
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
   categoryId   String?
+  madeBy       String?
+  addedBy      String?
   dbCategory   Category?       @relation(fields: [categoryId], references: [id])
   collection   Collection?     @relation(fields: [collectionId], references: [id])
+  madeByAdmin  AdminUser?      @relation("ProductMadeBy", fields: [madeBy], references: [id])
+  addedByAdmin AdminUser?      @relation("ProductAddedBy", fields: [addedBy], references: [id])
   images       ProductImage[]
+  orderProducts OrderProduct[]
 
   @@map("products")
 }
@@ -137,6 +144,40 @@ model Session {
   @@map("sessions")
 }
 
+model Order {
+  id                String      @id @default(cuid())
+  customerName      String
+  customerPhone     String?
+  customerUsername  String?
+  source            OrderSource @default(Telegram)
+  totalAmount       Float
+  status            OrderStatus @default(Pending)
+  notes             String?
+  estimatedDelivery DateTime?
+  actualDelivery    DateTime?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  
+  // Many-to-many relationship with products
+  products          OrderProduct[]
+  
+  @@map("orders")
+}
+
+model OrderProduct {
+  id        String   @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  
+  order    Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product  Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@unique([orderId, productId])
+  @@map("order_products")
+}
+
 model Notification {
   id          String   @id @default(cuid())
   type        String
@@ -147,6 +188,21 @@ model Notification {
   createdAt   DateTime @default(now())
 
   @@map("notifications")
+}
+
+enum OrderSource {
+  Telegram
+  Instagram
+  Site
+}
+
+enum OrderStatus {
+  Pending
+  Confirmed
+  Ready
+  Shipped
+  Delivered
+  Cancelled
 }
 
 enum TestimonialSource {

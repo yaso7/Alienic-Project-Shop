@@ -39,6 +39,8 @@ interface Product {
   createdAt: Date
   updatedAt: Date
   images?: Array<{ id: string; imageUrl: string; order: number }>
+  madeByAdmin?: { id: string; email: string } | null
+  addedByAdmin?: { id: string; email: string } | null
 }
 
 interface Category {
@@ -235,6 +237,8 @@ export default function ProductsPage() {
                     </div>
                   </TableHead>
                   <TableHead>Collection</TableHead>
+                  <TableHead>Made By</TableHead>
+                  <TableHead>Added By</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort('createdAt')}>
                     <div className="flex items-center gap-1">
@@ -267,6 +271,12 @@ export default function ProductsPage() {
                     <TableCell>${product.priceNumeric?.toFixed(2) || '0.00'}</TableCell>
                     <TableCell className="text-muted-foreground">
                       {product.collection?.title || '-'}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {product.madeByAdmin?.email || '-'}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">
+                      {product.addedByAdmin?.email || '-'}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">

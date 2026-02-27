@@ -2,12 +2,14 @@ import { redirect, notFound } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { ProductForm } from "@/components/admin/product-form"
 import { revalidatePath } from "next/cache"
+import { getCurrentAdmin } from "@/lib/auth"
 
 export default async function EditProductPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
+  const currentAdmin = await getCurrentAdmin()
   const { id } = await params
   const [product, collections] = await Promise.all([
     prisma.product.findUnique({
@@ -43,6 +45,8 @@ export default async function EditProductPage({
     const images = formData.get("images") as string
     const isFeatured = formData.get("isFeatured") === "on"
     const isAvailable = formData.get("isAvailable") === "on"
+    const madeBy = formData.get("madeBy") as string
+    const addedBy = formData.get("addedBy") as string
 
     const imageUrls = images ? JSON.parse(images) : [image]
 
@@ -66,6 +70,8 @@ export default async function EditProductPage({
         image,
         isFeatured,
         isAvailable,
+        madeBy: madeBy || null,
+        addedBy: addedBy || null,
         images: {
           create: imageUrls.map((url: string, index: number) => ({
             imageUrl: url,
@@ -98,7 +104,7 @@ export default async function EditProductPage({
       <ProductForm action={updateProduct} product={{
     ...product,
     images: product.images.map(img => img.imageUrl)
-  }} collections={collections} />
+  }} collections={collections} currentAdminId={currentAdmin?.id} />
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { requireAuth } from "@/lib/auth"
 import Link from "next/link"
-import { LayoutDashboard, Package, MessageSquare, Mail, Home, Tag } from "lucide-react"
+import { LayoutDashboard, Package, MessageSquare, Mail, Home, Tag, ShoppingCart } from "lucide-react"
 import { AdminHeader } from "@/components/admin/admin-header"
 import { AdminFooter } from "@/components/admin/admin-footer"
 
@@ -59,6 +59,15 @@ export default async function AdminLayout({
                 >
                   <Tag size={18} />
                   Categories
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/admin/orders"
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors rounded-md"
+                >
+                  <ShoppingCart size={18} />
+                  Orders
                 </Link>
               </li>
               <li>

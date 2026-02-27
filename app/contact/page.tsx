@@ -33,7 +33,7 @@ const faqItems = [
   {
     question: "What materials do you work with?",
     answer:
-      "Sterling silver, oxidized metals, matte black steel, titanium, and occasionally rare materials like meteorite fragments. Each material is chosen for its ability to carry meaning and age beautifully.",
+      "Sterling silver, oxidized metals, matte black steel, titanium, and occasionally rare materials like gemstones and meteorite fragments. Each material is chosen for its ability to carry meaning and age beautifully.",
   },
 ]
 

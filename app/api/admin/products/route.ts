@@ -57,6 +57,12 @@ export async function GET(request: Request) {
           dbCategory: true, // Include the related category
           images: {
             orderBy: { order: 'asc' }
+          },
+          madeByAdmin: {
+            select: { id: true, email: true }
+          },
+          addedByAdmin: {
+            select: { id: true, email: true }
           }
         },
         orderBy,
