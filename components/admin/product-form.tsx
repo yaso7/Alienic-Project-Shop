@@ -31,7 +31,9 @@ const productSchema = z.object({
   image: z.string().min(1, "At least one image is required"),
   images: z.array(z.string()).optional(),
   isFeatured: z.boolean().default(false),
-  isAvailable: z.boolean().default(true),
+  status: z.enum(["Available", "NotAvailable", "Archived", "Draft"]).default("Available"),
+  isCustom: z.boolean().default(false),
+  customer: z.string().optional(),
   madeBy: z.string().optional(),
   addedBy: z.string().optional(),
 })
@@ -63,7 +65,9 @@ interface ProductFormProps {
     image: string
     images?: string[]
     isFeatured: boolean
-    isAvailable: boolean
+    status: "Available" | "NotAvailable" | "Archived" | "Draft"
+    isCustom: boolean
+    customer?: string | null
     madeBy?: string | null
     addedBy?: string | null
   }
@@ -98,13 +102,16 @@ export function ProductForm({ action, product, collections, currentAdminId }: Pr
           story: product.story,
           image: product.image,
           isFeatured: product.isFeatured,
-          isAvailable: product.isAvailable,
+          status: product.status,
+          isCustom: product.isCustom,
+          customer: product.customer || "",
           madeBy: product.madeBy || "",
           addedBy: product.addedBy || "",
         }
       : {
           categoryId: "",
-          isAvailable: true,
+          status: "Available",
+          isCustom: false,
           addedBy: currentAdminId || "",
         },
   })
@@ -163,7 +170,8 @@ export function ProductForm({ action, product, collections, currentAdminId }: Pr
 
   const categoryId = watch("categoryId")
   const isFeatured = watch("isFeatured")
-  const isAvailable = watch("isAvailable")
+  const status = watch("status")
+  const isCustom = watch("isCustom")
   const imagePath = watch("image")
   const [imagePreview, setImagePreview] = useState<string | null>(product?.image || productImages[0] || null)
 
@@ -241,7 +249,9 @@ export function ProductForm({ action, product, collections, currentAdminId }: Pr
     formData.append("image", data.image)
     formData.append("images", JSON.stringify(productImages))
     formData.append("isFeatured", data.isFeatured ? "on" : "")
-    formData.append("isAvailable", data.isAvailable ? "on" : "")
+    formData.append("status", data.status)
+    formData.append("isCustom", data.isCustom ? "on" : "")
+    formData.append("customer", data.customer || "")
     formData.append("madeBy", data.madeBy || "")
     formData.append("addedBy", data.addedBy || currentAdminId || "")
     await action(formData)
@@ -464,23 +474,59 @@ export function ProductForm({ action, product, collections, currentAdminId }: Pr
         </div>
       </div>
 
-      <div className="flex items-center gap-6">
-        <div className="flex items-center gap-2">
-          <Switch
-            id="isFeatured"
-            checked={isFeatured}
-            onCheckedChange={(checked) => setValue("isFeatured", checked)}
-          />
-          <Label htmlFor="isFeatured">Featured</Label>
+      <div className="space-y-6">
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <Switch
+              id="isFeatured"
+              checked={isFeatured}
+              onCheckedChange={(checked) => setValue("isFeatured", checked)}
+            />
+            <Label htmlFor="isFeatured">Featured</Label>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Switch
+              id="isCustom"
+              checked={isCustom}
+              onCheckedChange={(checked) => setValue("isCustom", checked)}
+            />
+            <Label htmlFor="isCustom">Custom Product</Label>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Switch
-            id="isAvailable"
-            checked={isAvailable}
-            onCheckedChange={(checked) => setValue("isAvailable", checked)}
-          />
-          <Label htmlFor="isAvailable">Available</Label>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="status">Status *</Label>
+            <Select
+              value={status}
+              onValueChange={(value) => setValue("status", value as "Available" | "NotAvailable" | "Archived" | "Draft")}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Available">Available</SelectItem>
+                <SelectItem value="NotAvailable">Not Available</SelectItem>
+                <SelectItem value="Archived">Archived</SelectItem>
+                <SelectItem value="Draft">Draft</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {isCustom && (
+            <div className="space-y-2">
+              <Label htmlFor="customer">Customer *</Label>
+              <Input
+                id="customer"
+                {...register("customer")}
+                placeholder="Customer name or username"
+              />
+              <p className="text-sm text-muted-foreground">
+                Enter the customer's name or username for custom products
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

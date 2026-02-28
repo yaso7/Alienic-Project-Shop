@@ -38,6 +38,7 @@ interface Product {
   status: "Available" | "NotAvailable" | "Archived" | "Draft"
   isCustom: boolean
   customer?: string | null
+  orderStatus?: string // Add order status to track
   createdAt: Date
   updatedAt: Date
   images?: Array<{ id: string; imageUrl: string; order: number }>
@@ -64,7 +65,7 @@ interface PaginatedResponse {
   pageSize: number
 }
 
-export default function ProductsPage() {
+export default function CustomProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -79,8 +80,6 @@ export default function ProductsPage() {
   const [sortBy, setSortBy] = useState('createdAt')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const pageSize = 10
-
-  console.log('Products page state:', { products: products.length, total, page, pageSize }) // Debug log
 
   useEffect(() => {
     fetchProducts()
@@ -119,6 +118,7 @@ export default function ProductsPage() {
         search,
         page: page.toString(),
         pageSize: pageSize.toString(),
+        isCustom: 'true', // Only get custom products
         ...(status && status !== 'all' && { status }),
         ...(category && category !== 'all' && { categoryId: category }),
         ...(madeBy && madeBy !== 'all' && { madeBy }),
@@ -129,8 +129,26 @@ export default function ProductsPage() {
       const response = await fetch(`/api/admin/products?${params}`)
       if (response.ok) {
         const data: PaginatedResponse = await response.json()
-        console.log('All products API response:', data) // Debug log
-        setProducts(data.products)
+        console.log('Custom products API response:', data) // Debug log
+        
+        // Fetch order status for each custom product
+        const productsWithOrderStatus = await Promise.all(
+          data.products.map(async (product) => {
+            try {
+              const productResponse = await fetch(`/api/admin/products/${product.id}`)
+              if (productResponse.ok) {
+                const productWithOrder = await productResponse.json()
+                return { ...product, orderStatus: productWithOrder.orderStatus }
+              }
+              return product
+            } catch (error) {
+              console.error(`Failed to fetch order status for product ${product.id}:`, error)
+              return product
+            }
+          })
+        )
+        
+        setProducts(productsWithOrderStatus)
         setTotal(data.total)
       }
     } catch (error) {
@@ -168,16 +186,16 @@ export default function ProductsPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            All Products
+            Custom Products
           </h1>
           <p className="text-sm text-muted-foreground">
-            Manage all products (brand and custom) displayed in the shop
+            Manage custom products made for specific customers
           </p>
         </div>
         <Link href="/admin/products/new">
           <Button>
             <Plus className="mr-2 size-4" />
-            New Product
+            New Custom Product
           </Button>
         </Link>
       </div>
@@ -189,7 +207,7 @@ export default function ProductsPage() {
           setPage(1)
         }}
         onReset={handleResetFilters}
-        placeholder="Search all products by name, slug, customer, or material..."
+        placeholder="Search custom products by name, slug, customer, or material..."
         additionalFilters={
           <div className="flex gap-2 flex-wrap">
             <Select value={category} onValueChange={(value) => {
@@ -267,7 +285,7 @@ export default function ProductsPage() {
              (category && category !== 'all') || 
              (madeBy && madeBy !== 'all') || 
              (addedBy && addedBy !== 'all') 
-             ? 'No products found matching your filters' : 'No products yet'}
+             ? 'No custom products found matching your filters' : 'No custom products yet'}
           </p>
           {search || 
            (status && status !== 'all') || 
@@ -279,7 +297,7 @@ export default function ProductsPage() {
             </Button>
           ) : (
             <Link href="/admin/products/new">
-              <Button variant="outline">Create your first product</Button>
+              <Button variant="outline">Create your first custom product</Button>
             </Link>
           )}
         </div>
@@ -297,7 +315,6 @@ export default function ProductsPage() {
                       </span>
                     </div>
                   </TableHead>
-                  <TableHead>Type</TableHead>
                   <TableHead>Customer</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort('price')}>
@@ -334,22 +351,9 @@ export default function ProductsPage() {
                   <TableRow key={product.id}>
                     <TableCell className="font-medium">{product.name}</TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
-                        {product.isCustom ? (
-                          <Badge variant="outline" className="text-blue-600">Custom</Badge>
-                        ) : (
-                          <Badge variant="outline" className="text-green-600">Brand</Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {product.customer ? (
-                        <Badge variant="outline" className="text-purple-600">
-                          {product.customer}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
+                      <Badge variant="outline" className="text-blue-600">
+                        {product.customer || '-'}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline">
@@ -383,6 +387,8 @@ export default function ProductsPage() {
                       <ProductActions 
                         productId={product.id} 
                         productName={product.name}
+                        isCustom={product.isCustom}
+                        orderStatus={product.orderStatus}
                         onSuccess={fetchProducts}
                       />
                     </TableCell>

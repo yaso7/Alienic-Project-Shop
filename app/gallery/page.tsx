@@ -1,18 +1,17 @@
 import type { Metadata } from "next"
-import { ShopGrid } from "@/components/shop/shop-grid"
+import { GalleryGrid } from "@/components/gallery/gallery-grid"
 import { prisma } from "@/lib/prisma"
 
 export const metadata: Metadata = {
-  title: "Shop",
+  title: "Gallery",
   description:
-    "Acquire handcrafted gothic and metallic artisan pieces from The Alienic Project.",
+    "Explore our collection of completed and sold artisan pieces from The Alienic Project archives.",
 }
 
-export default async function ShopPage() {
+export default async function GalleryPage() {
   const products = await prisma.product.findMany({
     where: { 
-      status: "Available",
-      isCustom: false // Only show brand products in shop
+      status: "Archived"
     },
     include: { 
       collection: true,
@@ -24,7 +23,7 @@ export default async function ShopPage() {
     orderBy: { createdAt: "desc" },
   })
 
-  console.log('ShopPage - Fetched products:', products.map(p => ({ 
+  console.log('GalleryPage - Fetched archived products:', products.map(p => ({ 
     id: p.id, 
     name: p.name, 
     status: p.status,
@@ -42,19 +41,19 @@ export default async function ShopPage() {
       {/* Header */}
       <section className="py-24 md:py-32 px-6 noise-bg text-center">
         <h2 className="text-xs uppercase tracking-[0.3em] text-primary mb-4">
-          The Offering
+          The Archives
         </h2>
         <h1 className="hero-title text-4xl md:text-6xl text-foreground mb-6">
-          Sacred Acquisitions
+          Sacred Legacies
         </h1>
         <div className="gothic-divider w-48 mx-auto mb-6" />
         <p className="max-w-lg mx-auto text-lg text-muted-foreground leading-relaxed">
-          Each piece is a one-of-a-kind artifact, handcrafted with intention.
-          To acquire, reach out via Instagram or Telegram.
+          A collection of completed works and sold pieces. Each artifact tells a story of creation and transformation,
+          now preserved in our eternal gallery.
         </p>
       </section>
 
-      <ShopGrid products={products} categories={categories} />
+      <GalleryGrid products={products} categories={categories} />
     </div>
   )
 }

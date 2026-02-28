@@ -43,7 +43,7 @@ interface Product {
   name: string
   price: string
   priceNumeric: number
-  isAvailable: boolean
+  status: "Available" | "NotAvailable" | "Archived" | "Draft"
 }
 
 export function OrderDialog() {
@@ -69,7 +69,7 @@ export function OrderDialog() {
   const filteredProducts = useMemo(() => {
     if (!Array.isArray(products)) return []
     return products.filter(product => 
-      product.isAvailable && 
+      (product.status === 'Available' || product.status === 'Draft') && 
       product.name.toLowerCase().includes(productSearchQuery.toLowerCase())
     )
   }, [products, productSearchQuery])
@@ -98,7 +98,7 @@ export function OrderDialog() {
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch("/api/admin/products?status=available&pageSize=100")
+      const response = await fetch("/api/admin/products?pageSize=100")
       if (response.ok) {
         const data = await response.json()
         // API returns { products, total, page, pageSize }

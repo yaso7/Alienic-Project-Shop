@@ -60,6 +60,41 @@ export async function PUT(
       }
     })
 
+    // Handle product status updates based on order status
+    if (status === "Delivered" || status === "Cancelled") {
+      try {
+        // Get all products in this order with their details
+        const orderProducts = await prisma.orderProduct.findMany({
+          where: { orderId: finalOrderId },
+          include: {
+            product: true
+          }
+        })
+
+        for (const orderProduct of orderProducts) {
+          const product = orderProduct.product
+          
+          if (status === "Delivered") {
+            // Rule 1: If order is delivered, brand products status should be changed to archived
+            if (!product.isCustom) {
+              await prisma.product.update({
+                where: { id: product.id },
+                data: { status: "Archived" }
+              })
+            }
+            // Custom products keep their status when delivered (Rule 3)
+          } else if (status === "Cancelled") {
+            // Rule 2: If order is cancelled, custom products keep their status
+            // Brand products also keep their status when cancelled
+            // No status change needed for cancelled orders
+          }
+        }
+      } catch (productStatusError) {
+        console.error("Failed to update product statuses:", productStatusError)
+        // Continue with order update even if product status update fails
+      }
+    }
+
     // Handle product relations - simpler approach
     try {
       // First, delete all existing products for this order

@@ -12,6 +12,9 @@ export async function GET(request: Request) {
     const pageSize = parseInt(url.searchParams.get('pageSize') || '10')
     const status = url.searchParams.get('status') // available, unavailable, featured
     const categoryId = url.searchParams.get('categoryId')
+    const isCustom = url.searchParams.get('isCustom')
+    const madeBy = url.searchParams.get('madeBy')
+    const addedBy = url.searchParams.get('addedBy')
     const sortBy = url.searchParams.get('sortBy') || 'createdAt'
     const sortOrder = url.searchParams.get('sortOrder') || 'desc'
 
@@ -30,13 +33,25 @@ export async function GET(request: Request) {
     if (status === 'featured') {
       where.isFeatured = true
     } else if (status === 'available') {
-      where.isAvailable = true
+      where.status = 'Available'
     } else if (status === 'unavailable') {
-      where.isAvailable = false
+      where.status = 'NotAvailable'
     }
 
     if (categoryId) {
       where.categoryId = categoryId
+    }
+
+    if (madeBy) {
+      where.madeBy = madeBy
+    }
+
+    if (addedBy) {
+      where.addedBy = addedBy
+    }
+
+    if (isCustom) {
+      where.isCustom = isCustom === 'true'
     }
 
     // Build orderBy object
@@ -49,7 +64,12 @@ export async function GET(request: Request) {
       orderBy[sortBy] = sortOrder
     }
 
-    const [products, total] = await Promise.all([
+    console.log('API Request params:', {
+    search, status, categoryId, isCustom, madeBy, addedBy, sortBy, sortOrder, page, pageSize
+  })
+  console.log('API Where clause:', where)
+
+  const [products, total] = await Promise.all([
       prisma.product.findMany({
         where,
         include: { 

@@ -36,8 +36,6 @@ interface Product {
   dbCategory?: { name: string } | null
   isFeatured: boolean
   status: "Available" | "NotAvailable" | "Archived" | "Draft"
-  isCustom: boolean
-  customer?: string | null
   createdAt: Date
   updatedAt: Date
   images?: Array<{ id: string; imageUrl: string; order: number }>
@@ -64,7 +62,7 @@ interface PaginatedResponse {
   pageSize: number
 }
 
-export default function ProductsPage() {
+export default function BrandProductsPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -79,8 +77,6 @@ export default function ProductsPage() {
   const [sortBy, setSortBy] = useState('createdAt')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const pageSize = 10
-
-  console.log('Products page state:', { products: products.length, total, page, pageSize }) // Debug log
 
   useEffect(() => {
     fetchProducts()
@@ -119,6 +115,7 @@ export default function ProductsPage() {
         search,
         page: page.toString(),
         pageSize: pageSize.toString(),
+        isCustom: 'false', // Only get brand products
         ...(status && status !== 'all' && { status }),
         ...(category && category !== 'all' && { categoryId: category }),
         ...(madeBy && madeBy !== 'all' && { madeBy }),
@@ -129,7 +126,7 @@ export default function ProductsPage() {
       const response = await fetch(`/api/admin/products?${params}`)
       if (response.ok) {
         const data: PaginatedResponse = await response.json()
-        console.log('All products API response:', data) // Debug log
+        console.log('Brand products API response:', data) // Debug log
         setProducts(data.products)
         setTotal(data.total)
       }
@@ -168,10 +165,10 @@ export default function ProductsPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            All Products
+            Brand Products
           </h1>
           <p className="text-sm text-muted-foreground">
-            Manage all products (brand and custom) displayed in the shop
+            Manage brand products displayed in the shop
           </p>
         </div>
         <Link href="/admin/products/new">
@@ -189,7 +186,7 @@ export default function ProductsPage() {
           setPage(1)
         }}
         onReset={handleResetFilters}
-        placeholder="Search all products by name, slug, customer, or material..."
+        placeholder="Search brand products by name, slug, or material..."
         additionalFilters={
           <div className="flex gap-2 flex-wrap">
             <Select value={category} onValueChange={(value) => {
@@ -267,7 +264,7 @@ export default function ProductsPage() {
              (category && category !== 'all') || 
              (madeBy && madeBy !== 'all') || 
              (addedBy && addedBy !== 'all') 
-             ? 'No products found matching your filters' : 'No products yet'}
+             ? 'No brand products found matching your filters' : 'No brand products yet'}
           </p>
           {search || 
            (status && status !== 'all') || 
@@ -279,7 +276,7 @@ export default function ProductsPage() {
             </Button>
           ) : (
             <Link href="/admin/products/new">
-              <Button variant="outline">Create your first product</Button>
+              <Button variant="outline">Create your first brand product</Button>
             </Link>
           )}
         </div>
@@ -297,8 +294,6 @@ export default function ProductsPage() {
                       </span>
                     </div>
                   </TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Customer</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead className="cursor-pointer hover:bg-muted/50" onClick={() => handleSort('price')}>
                     <div className="flex items-center gap-1">
@@ -333,24 +328,6 @@ export default function ProductsPage() {
                 {products.map((product) => (
                   <TableRow key={product.id}>
                     <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        {product.isCustom ? (
-                          <Badge variant="outline" className="text-blue-600">Custom</Badge>
-                        ) : (
-                          <Badge variant="outline" className="text-green-600">Brand</Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {product.customer ? (
-                        <Badge variant="outline" className="text-purple-600">
-                          {product.customer}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
                     <TableCell>
                       <Badge variant="outline">
                         {product.dbCategory?.name || '-'}

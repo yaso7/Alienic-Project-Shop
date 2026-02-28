@@ -13,9 +13,9 @@ model AdminUser {
   hashedPassword String
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
-  sessions       Session[]
-  madeProducts   Product[] @relation("ProductMadeBy")
   addedProducts  Product[] @relation("ProductAddedBy")
+  madeProducts   Product[] @relation("ProductMadeBy")
+  sessions       Session[]
 
   @@map("admin_users")
 }
@@ -38,41 +38,43 @@ model Collection {
 }
 
 model Product {
-  id           String          @id @default(cuid())
-  slug         String          @unique
-  name         String
-  price        String
-  priceNumeric Float
-  material     String
-  collectionId String?
-  story        String
-  image        String
-  isFeatured   Boolean         @default(false)
-  isAvailable  Boolean         @default(true)
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
-  categoryId   String?
-  madeBy       String?
-  addedBy      String?
-  dbCategory   Category?       @relation(fields: [categoryId], references: [id])
-  collection   Collection?     @relation(fields: [collectionId], references: [id])
-  madeByAdmin  AdminUser?      @relation("ProductMadeBy", fields: [madeBy], references: [id])
-  addedByAdmin AdminUser?      @relation("ProductAddedBy", fields: [addedBy], references: [id])
-  images       ProductImage[]
+  id            String         @id @default(cuid())
+  slug          String         @unique
+  name          String
+  price         String
+  material      String
+  collectionId  String?
+  story         String
+  image         String
+  isFeatured    Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  categoryId    String?
+  priceNumeric  Float
+  addedBy       String?
+  madeBy        String?
+  customer      String?
+  isCustom      Boolean        @default(false)
+  status        ProductStatus  @default(Available)
   orderProducts OrderProduct[]
+  images        ProductImage[]
+  addedByAdmin  AdminUser?     @relation("ProductAddedBy", fields: [addedBy], references: [id])
+  dbCategory    Category?      @relation(fields: [categoryId], references: [id])
+  collection    Collection?    @relation(fields: [collectionId], references: [id])
+  madeByAdmin   AdminUser?     @relation("ProductMadeBy", fields: [madeBy], references: [id])
 
   @@map("products")
 }
 
 model ProductImage {
-  id         String   @id @default(cuid())
-  productId  String
-  imageUrl   String
-  altText    String?
-  order      Int      @default(0)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid())
+  productId String
+  imageUrl  String
+  altText   String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@map("product_images")
 }
@@ -90,19 +92,19 @@ model Category {
 }
 
 model Testimonial {
-  id           String            @id @default(cuid())
-  name         String
-  location     String?
-  rating       Int               @default(5)
-  text         String
-  pieceAcquired String?
-  source       TestimonialSource @default(Form)
-  status       TestimonialStatus @default(Pending)
-  showOnHomepage Boolean          @default(false)
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
-  imageId      String?           @unique
-  image        TestimonialImage? @relation(fields: [imageId], references: [id])
+  id             String            @id @default(cuid())
+  name           String
+  location       String?
+  rating         Int               @default(5)
+  text           String
+  source         TestimonialSource @default(Form)
+  status         TestimonialStatus @default(Pending)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  imageId        String?           @unique
+  pieceAcquired  String?
+  showOnHomepage Boolean           @default(false)
+  image          TestimonialImage? @relation(fields: [imageId], references: [id])
 
   @@map("testimonials")
 }
@@ -145,22 +147,20 @@ model Session {
 }
 
 model Order {
-  id                String      @id @default(cuid())
+  id                String         @id @default(cuid())
   customerName      String
   customerPhone     String?
-  customerUsername  String?
-  source            OrderSource @default(Telegram)
+  source            OrderSource    @default(Telegram)
   totalAmount       Float
-  status            OrderStatus @default(Pending)
+  status            OrderStatus    @default(Pending)
   notes             String?
-  estimatedDelivery DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
   actualDelivery    DateTime?
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  
-  // Many-to-many relationship with products
+  customerUsername  String?
+  estimatedDelivery DateTime?
   products          OrderProduct[]
-  
+
   @@map("orders")
 }
 
@@ -170,10 +170,9 @@ model OrderProduct {
   productId String
   quantity  Int      @default(1)
   createdAt DateTime @default(now())
-  
-  order    Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product  Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
   @@unique([orderId, productId])
   @@map("order_products")
 }
@@ -199,10 +198,10 @@ enum OrderSource {
 enum OrderStatus {
   Pending
   Confirmed
-  Ready
   Shipped
   Delivered
   Cancelled
+  Ready
 }
 
 enum TestimonialSource {
@@ -220,4 +219,11 @@ enum ContactMessageStatus {
   New
   Read
   Archived
+}
+
+enum ProductStatus {
+  Available
+  NotAvailable
+  Archived
+  Draft
 }

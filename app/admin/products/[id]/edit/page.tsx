@@ -44,9 +44,11 @@ export default async function EditProductPage({
     const image = formData.get("image") as string
     const images = formData.get("images") as string
     const isFeatured = formData.get("isFeatured") === "on"
-    const isAvailable = formData.get("isAvailable") === "on"
     const madeBy = formData.get("madeBy") as string
     const addedBy = formData.get("addedBy") as string
+    const status = formData.get("status") as string
+    const customer = formData.get("customer") as string
+    const isCustom = formData.get("isCustom") === "on"
 
     const imageUrls = images ? JSON.parse(images) : [image]
 
@@ -69,7 +71,9 @@ export default async function EditProductPage({
         story,
         image,
         isFeatured,
-        isAvailable,
+        status: status as "Available" | "NotAvailable" | "Archived" | "Draft",
+        isCustom,
+        customer: customer || null,
         madeBy: madeBy || null,
         addedBy: addedBy || null,
         images: {

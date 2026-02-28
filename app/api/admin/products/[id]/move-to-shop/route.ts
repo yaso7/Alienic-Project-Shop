@@ -1,0 +1,56 @@
+import { NextRequest, NextResponse } from "next/server"
+import { requireAuth } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
+
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    await requireAuth()
+    
+    const resolvedParams = await params
+    const productId = resolvedParams.id
+    
+    if (!productId) {
+      return NextResponse.json(
+        { error: "Product ID is required" },
+        { status: 400 }
+      )
+    }
+
+    // Get the product
+    const product = await prisma.product.findUnique({
+      where: { id: productId }
+    })
+
+    if (!product) {
+      return NextResponse.json(
+        { error: "Product not found" },
+        { status: 404 }
+      )
+    }
+
+    // Move to shop by setting status to available
+    const updatedProduct = await prisma.product.update({
+      where: { id: productId },
+      data: {
+        isCustom: false,
+        customer: null, // Clear customer info when moving to shop
+        status: "Available"
+      }
+    })
+
+    return NextResponse.json({ 
+      success: true, 
+      product: updatedProduct,
+      message: "Product moved to shop successfully" 
+    })
+  } catch (error) {
+    console.error("Failed to move product to shop:", error)
+    return NextResponse.json(
+      { error: "Failed to move product to shop", details: error instanceof Error ? error.message : "Unknown error" },
+      { status: 500 }
+    )
+  }
+}
