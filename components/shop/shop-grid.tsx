@@ -170,7 +170,7 @@ function ProductModal({
 
             <div className="flex flex-col gap-2 mt-2">
               <a
-                href="https://instagram.com/alienicproject"
+                href="https://instagram.com/alienicbrand"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground text-sm uppercase tracking-[0.2em] hover:bg-primary/90 transition-all duration-300"
@@ -179,7 +179,7 @@ function ProductModal({
                 Inquire on Instagram
               </a>
               <a
-                href="https://t.me/alienicproject"
+                href="https://t.me/AlienicBrand"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 px-6 py-3 border border-border text-foreground text-sm uppercase tracking-[0.2em] hover:bg-accent transition-all duration-300"

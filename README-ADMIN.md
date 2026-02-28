@@ -53,7 +53,7 @@ npm run create-admin <your-email> <your-password>
 
 Example:
 ```bash
-npm run create-admin admin@alienicproject.com mySecurePassword123
+npm run create-admin admin@alienicbrand.com mySecurePassword123
 ```
 
 ### 3. Start the Development Server

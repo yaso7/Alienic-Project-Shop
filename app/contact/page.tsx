@@ -13,7 +13,7 @@ const faqItems = [
   {
     question: "How do I place an order?",
     answer:
-      "All orders are handled personally. Reach out via Instagram DM (@alienicproject) or Telegram (@alienicproject) with the piece you desire. We will guide you through the sacred exchange.",
+      "All orders are handled personally. Reach out via Instagram DM (@alienicbrand) or Telegram (@AlienicBrand) with the piece you desire. We will guide you through the sacred exchange.",
   },
   {
     question: "Do you accept custom commissions?",
@@ -75,7 +75,7 @@ export default function ContactPage() {
               </h2>
               <div className="flex flex-col gap-4">
                 <a
-                  href="https://instagram.com/alienicproject"
+                  href="https://instagram.com/alienicbrand"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 p-4 bg-card border border-border hover:border-primary/30 transition-all duration-300"
@@ -84,12 +84,12 @@ export default function ContactPage() {
                   <div>
                     <p className="text-lg text-foreground">Instagram</p>
                     <p className="text-sm text-muted-foreground">
-                      @alienicproject
+                      @alienicbrand
                     </p>
                   </div>
                 </a>
                 <a
-                  href="https://t.me/alienicproject"
+                  href="https://t.me/AlienicBrand"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 p-4 bg-card border border-border hover:border-primary/30 transition-all duration-300"
@@ -104,7 +104,7 @@ export default function ContactPage() {
                   <div>
                     <p className="text-lg text-foreground">Telegram</p>
                     <p className="text-sm text-muted-foreground">
-                      @alienicproject
+                      @AlienicBrand
                     </p>
                   </div>
                 </a>

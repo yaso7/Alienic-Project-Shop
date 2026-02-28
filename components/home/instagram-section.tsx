@@ -29,13 +29,13 @@ export function InstagramSection() {
             From the Archive
           </h2>
           <a
-            href="https://instagram.com/alienicproject"
+            href="https://instagram.com/alienicbrand"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 main-title text-2xl md:text-3xl text-foreground hover:text-primary transition-colors duration-300"
           >
             <Instagram size={28} />
-            @alienicproject
+            @alienicbrand
           </a>
         </div>
 
@@ -43,7 +43,7 @@ export function InstagramSection() {
           {previewImages.map((image, index) => (
             <a
               key={index}
-              href="https://instagram.com/alienicproject"
+              href="https://instagram.com/alienicbrand"
               target="_blank"
               rel="noopener noreferrer"
               className="group relative aspect-square overflow-hidden"
