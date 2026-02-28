@@ -118,7 +118,7 @@ export default function ContactPage() {
               </h2>
               <div className="relative aspect-[16/9] overflow-hidden border border-border">
                 <Image
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Business%20Card-Back-X1PVYHVGorSMAgQgdLvYvxXCeD4hmJ.png"
+                  src="https://a7waintojpncbj2p.public.blob.vercel-storage.com/BC-%20Back.png"
                   alt="Alienic Project business card with QR code and social links"
                   fill
                   className="object-cover"
