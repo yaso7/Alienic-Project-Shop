@@ -29,7 +29,7 @@ export function HeroSection() {
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center gap-8 px-6 text-center">
         <Image
-          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Stamp%20%282%29-OQLcMTwasYk5b1pU7FenDxjZwtPx4V.png"
+          src="https://a7waintojpncbj2p.public.blob.vercel-storage.com/Black.png"
           alt="Alienic Project Seal"
           width={120}
           height={120}

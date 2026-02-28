@@ -10,7 +10,7 @@ export function Footer() {
           {/* Brand */}
           <div className="flex flex-col items-center md:items-start gap-4">
             <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Stamp%20%282%29-OQLcMTwasYk5b1pU7FenDxjZwtPx4V.png"
+              src="https://a7waintojpncbj2p.public.blob.vercel-storage.com/Black.png"
               alt="Alienic Project Logo"
               width={60}
               height={60}

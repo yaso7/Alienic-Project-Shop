@@ -114,7 +114,7 @@ export default function AboutPage() {
             Expanded Philosophy
           </h2>
           <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Stamp%20%282%29-OQLcMTwasYk5b1pU7FenDxjZwtPx4V.png"
+            src="https://a7waintojpncbj2p.public.blob.vercel-storage.com/Black.png"
             alt="Alienic seal"
             width={80}
             height={80}
