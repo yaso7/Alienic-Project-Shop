@@ -2,6 +2,8 @@ import type { Metadata } from "next"
 import { ShopGrid } from "@/components/shop/shop-grid"
 import { prisma } from "@/lib/prisma"
 
+export const revalidate = 60 // Revalidate every 60 seconds
+
 export const metadata: Metadata = {
   title: "Shop",
   description:

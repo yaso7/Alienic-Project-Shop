@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requireAuth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { revalidatePath } from "next/cache"
 
 export async function PUT(
   request: NextRequest,
@@ -81,6 +82,11 @@ export async function PUT(
                 where: { id: product.id },
                 data: { status: "Archived" }
               })
+              
+              // Revalidate cache since product status changed
+              revalidatePath('/shop')
+              revalidatePath('/gallery')
+              revalidatePath('/')
             }
             // Custom products keep their status when delivered (Rule 3)
           } else if (status === "Cancelled") {

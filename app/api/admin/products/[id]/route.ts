@@ -70,8 +70,9 @@ export async function DELETE(
       where: { id },
     })
     
-    // Revalidate cache for shop and home pages
+    // Revalidate cache for shop, gallery and home pages
     revalidatePath('/shop')
+    revalidatePath('/gallery')
     revalidatePath('/')
     
     return NextResponse.json({ success: true })
@@ -102,8 +103,9 @@ export async function POST(
         where: { id },
       })
       
-      // Revalidate cache for shop and home pages
+      // Revalidate cache for shop, gallery and home pages
       revalidatePath('/shop')
+      revalidatePath('/gallery')
       revalidatePath('/')
       
       return NextResponse.json({ success: true })
