@@ -11,6 +11,9 @@ export async function GET() {
         id: true,
         email: true,
       },
+      where: {
+        status: "Active"
+      },
       orderBy: {
         email: 'asc'
       }

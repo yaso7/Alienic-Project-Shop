@@ -11,6 +11,7 @@ model AdminUser {
   id             String    @id @default(cuid())
   email          String    @unique
   hashedPassword String
+  status         AdminUserStatus @default(Inactive)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   addedProducts  Product[] @relation("ProductAddedBy")
@@ -226,4 +227,9 @@ enum ProductStatus {
   NotAvailable
   Archived
   Draft
+}
+
+enum AdminUserStatus {
+  Active
+  Inactive
 }

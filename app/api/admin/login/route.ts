@@ -33,6 +33,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Update user status to Active on successful login
+    await prisma.adminUser.update({
+      where: { id: admin.id },
+      data: { status: "Active" }
+    })
+
     await createSession(admin.id)
 
     return NextResponse.json({ success: true })
