@@ -63,15 +63,15 @@ export default function AdminLoginPage() {
               htmlFor="email"
               className="text-xs uppercase tracking-[0.2em] text-muted-foreground"
             >
-              Email
+              User
             </label>
             <input
               id="email"
-              type="email"
+              type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="admin@example.com"
+              placeholder="admin"
               className="bg-input border border-border px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:border-primary focus:outline-none transition-colors"
             />
           </div>
