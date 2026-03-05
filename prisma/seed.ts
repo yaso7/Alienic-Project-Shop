@@ -153,7 +153,7 @@ async function main() {
       image:
         "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PFP-Black-PrwFTaDbWXZr9S6Y5KiouNx5x0YhKZ.png",
       isFeatured: true,
-      isAvailable: true,
+      status: "Available",
     },
   })
 
@@ -171,7 +171,7 @@ async function main() {
       image:
         "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/SC-%20Concept.1-Ee32igpxofdLPJjer1kWRmZ1zKmkV3.png",
       isFeatured: true,
-      isAvailable: true,
+      status: "Available",
     },
   })
 
@@ -189,7 +189,7 @@ async function main() {
       image:
         "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PFP-White-Yab1gmXrg4upN6ybuve3oAVG39odZF.png",
       isFeatured: false,
-      isAvailable: true,
+      status: "Available",
     },
   })
 
@@ -207,7 +207,7 @@ async function main() {
       image:
         "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Business%20Card-Front-m3BoQOivskc8izgiDAkRwaU9IqcqJB.png",
       isFeatured: false,
-      isAvailable: true,
+      status: "Available",
     },
   })
 
@@ -225,7 +225,7 @@ async function main() {
       image:
         "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1.Sticker-%20Logo-zkFcGsmctG92tbpbE9EKeUL5Jrkz5d.png",
       isFeatured: true,
-      isAvailable: true,
+      status: "Available",
     },
   })
 
@@ -243,7 +243,7 @@ async function main() {
       image:
         "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PFP-Black-PrwFTaDbWXZr9S6Y5KiouNx5x0YhKZ.png",
       isFeatured: false,
-      isAvailable: true,
+      status: "Available",
     },
   })
 
@@ -262,7 +262,7 @@ async function main() {
       image:
         "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PFP-White-Yab1gmXrg4upN6ybuve3oAVG39odZF.png",
       isFeatured: false,
-      isAvailable: true,
+      status: "Available",
     },
   })
 
@@ -280,7 +280,7 @@ async function main() {
       image:
         "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Business%20Card-Front-m3BoQOivskc8izgiDAkRwaU9IqcqJB.png",
       isFeatured: false,
-      isAvailable: true,
+      status: "Available",
     },
   })
 

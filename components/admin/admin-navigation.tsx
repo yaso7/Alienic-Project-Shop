@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { LayoutDashboard, Package, MessageSquare, Mail, Home, Tag, ShoppingCart, ChevronDown, ChevronRight } from "lucide-react"
+import { LayoutDashboard, Package, MessageSquare, Mail, Home, Tag, ShoppingCart, ChevronDown, ChevronRight, Gift } from "lucide-react"
 import { useState } from "react"
 
 export function AdminNavigation() {
@@ -84,6 +84,15 @@ export function AdminNavigation() {
           >
             <ShoppingCart size={18} />
             Orders
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="/admin/mystery-boxes"
+            className="flex items-center gap-3 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-accent transition-colors rounded-md"
+          >
+            <Gift size={18} />
+            Mystery Boxes
           </Link>
         </li>
         <li>

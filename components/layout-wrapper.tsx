@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
+import { Toaster } from "@/components/ui/toaster"
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -13,6 +14,7 @@ export function LayoutWrapper({ children }: { children: React.ReactNode }) {
       {!isAdminRoute && <Navigation />}
       <main className={!isAdminRoute ? "site-font" : ""}>{children}</main>
       {!isAdminRoute && <Footer />}
+      <Toaster />
     </>
   )
 }

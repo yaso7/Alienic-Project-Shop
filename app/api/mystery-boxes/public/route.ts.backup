@@ -1,0 +1,41 @@
+import { prisma } from "@/lib/prisma"
+import { NextResponse } from "next/server"
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json()
+    
+    // Map the design values to correct enum values
+    let designEnum: "Classic" | "Modern" | "Vintage" | "Custom" = "Classic"
+    if (body.design === "Extra") {
+      designEnum = "Modern"
+    } else if (body.design === "I don't care" || body.design === "IDontCare") {
+      designEnum = "Vintage"
+    } else if (body.design === "Simple") {
+      designEnum = "Classic"
+    } else if (["Classic", "Modern", "Vintage", "Custom"].includes(body.design)) {
+      designEnum = body.design as "Classic" | "Modern" | "Vintage" | "Custom"
+    }
+    
+    const mysteryBox = await prisma.mysteryBox.create({
+      data: {
+        title: body.title,
+        bundleSize: body.bundleSize as "Small" | "Medium" | "Large",
+        design: designEnum,
+        stylePreference: body.stylePreference as "Masculine" | "Feminine" | "IDontCare",
+        neckMeasurements: body.neckMeasurements,
+        wristMeasurements: body.wristMeasurements,
+        colorPreference: body.colorPreference,
+        notes: body.notes,
+        username: body.username,
+        price: body.price,
+        status: body.status as "Pending" | "Confirmed" | "Shipped" | "Delivered" | "Cancelled",
+      },
+    })
+
+    return NextResponse.json(mysteryBox)
+  } catch (e) {
+    console.error('Public mystery box creation error', e)
+    return NextResponse.json({ error: 'Failed to create mystery box order' }, { status: 500 })
+  }
+}-=

@@ -8,14 +8,14 @@ datasource db {
 }
 
 model AdminUser {
-  id             String    @id @default(cuid())
-  email          String    @unique
+  id             String          @id @default(cuid())
+  email          String          @unique
   hashedPassword String
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
   status         AdminUserStatus @default(Inactive)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  addedProducts  Product[] @relation("ProductAddedBy")
-  madeProducts   Product[] @relation("ProductMadeBy")
+  addedProducts  Product[]       @relation("ProductAddedBy")
+  madeProducts   Product[]       @relation("ProductMadeBy")
   sessions       Session[]
 
   @@map("admin_users")
@@ -190,6 +190,28 @@ model Notification {
   @@map("notifications")
 }
 
+model MysteryBox {
+  id                Int                 @id @default(autoincrement())
+  title             String              @db.VarChar(255)
+  bundleSize        BundleSizeEnum
+  design            DesignEnum
+  neckMeasurements  String?             @db.VarChar(100)
+  wristMeasurements String?             @db.VarChar(100)
+  colorPreference   String?             @db.VarChar(255)
+  notes             String?
+  status            MysteryBoxStatus    @default(Pending)
+  username          String?             @db.VarChar(255)
+  price             Decimal             @default(148.00) @db.Decimal(10, 2)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  stylePreference   StylePreferenceEnum @default(IDontCare)
+
+  @@index([createdAt], map: "idx_mystery_boxes_created_at")
+  @@index([status], map: "idx_mystery_boxes_status")
+  @@index([username], map: "idx_mystery_boxes_username")
+  @@map("mystery_boxes")
+}
+
 enum OrderSource {
   Telegram
   Instagram
@@ -232,4 +254,37 @@ enum ProductStatus {
 enum AdminUserStatus {
   Active
   Inactive
+}
+
+enum BundleSizeEnum {
+  Small
+  Medium
+  Large
+}
+
+enum DesignEnum {
+  Simple
+  Extra
+  IDontCare
+}
+
+enum StyleEnum {
+  Minimalist
+  Elegant
+  Casual
+  Formal
+}
+
+enum StylePreferenceEnum {
+  Masculine
+  Feminine
+  IDontCare
+}
+
+enum MysteryBoxStatus {
+  Pending
+  Confirmed
+  Shipped
+  Delivered
+  Cancelled
 }

@@ -1,0 +1,29 @@
+import { prisma } from "@/lib/prisma"
+import { NextResponse } from "next/server"
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json()
+    
+    const mysteryBox = await prisma.mysteryBox.create({
+      data: {
+        title: body.title,
+        bundleSize: body.bundleSize,
+        design: designEnum,
+        style: body.style,
+        neckMeasurements: body.neckMeasurements,
+        wristMeasurements: body.wristMeasurements,
+        colorPreference: body.colorPreference,
+        notes: body.notes,
+        username: body.username,
+        price: body.price,
+        status: body.status,
+      },
+    })
+
+    return NextResponse.json(mysteryBox)
+  } catch (e) {
+    console.error('Public mystery box creation error', e)
+    return NextResponse.json({ error: 'Failed to create mystery box order' }, { status: 500 })
+  }
+}
