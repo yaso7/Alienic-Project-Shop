@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { useState, useEffect } from "react"
 import { X, Instagram, ChevronLeft, ChevronRight } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { ImageZoom } from "@/components/ui/image-zoom"
 
 interface Product {
@@ -10,7 +11,7 @@ interface Product {
   name: string
   price: string
   material: string
-  collection: { title: string } | null
+  collection: { title: string; mood: string[] } | null
   story: string
   image: string
   images?: Array<{ id: string; imageUrl: string; order: number }>
@@ -23,7 +24,7 @@ interface ShopGridProps {
     name: string
     price: string
     material: string
-    collection: { title: string } | null
+    collection: { title: string; mood: string[] } | null
     story: string
     image: string
     images?: Array<{ id: string; imageUrl: string; order: number }>
@@ -198,7 +199,14 @@ export function ShopGrid({ products, categories }: ShopGridProps) {
   const [activeCategory, setActiveCategory] = useState("All")
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
+  const router = useRouter()
   const itemsPerPage = 9
+
+  const handleMoodClick = (mood: string, e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    router.push(`/shop?mood=${encodeURIComponent(mood)}`)
+  }
 
   const filteredProducts =
     activeCategory === "All"
@@ -308,6 +316,19 @@ export function ShopGrid({ products, categories }: ShopGridProps) {
                 <p className="text-m text-muted-foreground mt-1">
                   {product.material}
                 </p>
+                {product.collection?.mood && product.collection.mood.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {product.collection.mood.map((mood, i) => (
+                      <span
+                        key={i}
+                        onClick={(e) => handleMoodClick(mood, e)}
+                        className="text-xs uppercase tracking-[0.2em] text-primary border border-border px-2 py-1 hover:bg-primary hover:text-primary-foreground transition-all duration-300 cursor-pointer"
+                      >
+                        {mood}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
             </button>
             ))}

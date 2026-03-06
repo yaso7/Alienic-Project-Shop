@@ -1,17 +1,55 @@
-import type { Metadata } from "next"
-import Link from "next/link"
-import { prisma } from "@/lib/prisma"
+"use client"
 
-export const metadata: Metadata = {
-  title: "Projects",
-  description:
-    "Explore the sacred collections of The Alienic Project — each altar a testament to dark artistry.",
+import { useState, useEffect } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+
+interface Collection {
+  id: string
+  title: string
+  subtitle: string | null
+  description: string
+  mood: string[]
+  slug: string
+  order: number
 }
 
-export default async function ProjectsPage() {
-  const collections = await prisma.collection.findMany({
-    orderBy: { order: "asc" },
-  })
+export default function ProjectsPage() {
+  const [collections, setCollections] = useState<Collection[]>([])
+  const [loading, setLoading] = useState(true)
+  const router = useRouter()
+
+  useEffect(() => {
+    const fetchCollections = async () => {
+      try {
+        const response = await fetch('/api/collections')
+        if (response.ok) {
+          const data = await response.json()
+          setCollections(data)
+        }
+      } catch (error) {
+        console.error('Failed to fetch collections:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchCollections()
+  }, [])
+
+  const handleMoodClick = (mood: string) => {
+    router.push(`/shop?mood=${encodeURIComponent(mood)}`)
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-24">
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">Loading collections...</p>
+        </div>
+      </div>
+    )
+  }
   return (
     <div className="min-h-screen pt-24">
       {/* Header */}
@@ -55,12 +93,17 @@ export default async function ProjectsPage() {
                   {collection.mood.length > 0 && (
                     <div className="flex flex-wrap gap-2 justify-center">
                       {collection.mood.map((keyword, i) => (
-                        <span
+                        <button
                           key={i}
-                          className="text-xs uppercase tracking-[0.2em] text-primary border border-border px-3 py-1"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            handleMoodClick(keyword)
+                          }}
+                          className="text-xs uppercase tracking-[0.2em] text-primary border border-border px-3 py-1 hover:bg-primary hover:text-primary-foreground transition-all duration-300"
                         >
                           {keyword}
-                        </span>
+                        </button>
                       ))}
                     </div>
                   )}
