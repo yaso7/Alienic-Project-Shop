@@ -322,7 +322,7 @@ export default function MysteryBoxPage() {
 
             <p className="text-sm text-muted-foreground italic">
               Each mystery box is uniquely curated based on your preferences.
-              Processing time is 3-7 business days. You will be contacted with updates.
+              Processing time is 15-20 business days. You will be contacted with updates.
             </p>
 
             <div className="flex flex-col gap-2">
