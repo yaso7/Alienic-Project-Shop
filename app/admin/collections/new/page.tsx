@@ -15,11 +15,21 @@ export default function NewCollectionPage() {
     const moodString = formData.get("mood") as string
     const heroImage = formData.get("heroImage") as string
     const order = parseInt(formData.get("order") as string) || 0
+    const productIdsString = formData.get("productIds") as string
 
     const mood = moodString
       .split(",")
       .map((m) => m.trim())
       .filter(Boolean)
+
+    let productIds: string[] = []
+    if (productIdsString) {
+      try {
+        productIds = JSON.parse(productIdsString)
+      } catch (error) {
+        console.error("Failed to parse productIds:", error)
+      }
+    }
 
     await prisma.collection.create({
       data: {
@@ -31,6 +41,11 @@ export default function NewCollectionPage() {
         mood,
         heroImage,
         order,
+        ...(productIds.length > 0 && {
+          products: {
+            connect: productIds.map((id: string) => ({ id }))
+          }
+        })
       },
     })
 

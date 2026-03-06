@@ -74,7 +74,7 @@ export async function POST(request: Request) {
         description,
         shortDescription: shortDescription || null,
         mood: mood || [],
-        heroImage,
+        heroImage: heroImage || null,
         order: order || 0,
       },
     })

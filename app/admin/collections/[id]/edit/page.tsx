@@ -11,6 +11,15 @@ export default async function EditCollectionPage({
   const { id } = await params
   const collection = await prisma.collection.findUnique({
     where: { id },
+    include: {
+      products: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        }
+      }
+    }
   })
 
   if (!collection) {
@@ -29,11 +38,35 @@ export default async function EditCollectionPage({
     const moodString = formData.get("mood") as string
     const heroImage = formData.get("heroImage") as string
     const order = parseInt(formData.get("order") as string) || 0
+    const productIdsString = formData.get("productIds") as string
 
     const mood = moodString
       .split(",")
       .map((m) => m.trim())
       .filter(Boolean)
+
+    let productIds: string[] = []
+    if (productIdsString) {
+      try {
+        productIds = JSON.parse(productIdsString)
+      } catch (error) {
+        console.error("Failed to parse productIds:", error)
+      }
+    }
+
+    // Get current products to disconnect
+    const currentCollection = await prisma.collection.findUnique({
+      where: { id },
+      include: {
+        products: {
+          select: { id: true }
+        }
+      }
+    })
+
+    const currentProductIds = currentCollection?.products.map(p => p.id) || []
+    const productsToDisconnect = currentProductIds.filter(id => !productIds.includes(id))
+    const productsToConnect = productIds.filter(id => !currentProductIds.includes(id))
 
     await prisma.collection.update({
       where: { id },
@@ -46,6 +79,16 @@ export default async function EditCollectionPage({
         mood,
         heroImage,
         order,
+        ...(productsToDisconnect.length > 0 && {
+          products: {
+            disconnect: productsToDisconnect.map((id: string) => ({ id }))
+          }
+        }),
+        ...(productsToConnect.length > 0 && {
+          products: {
+            connect: productsToConnect.map((id: string) => ({ id }))
+          }
+        })
       },
     })
 

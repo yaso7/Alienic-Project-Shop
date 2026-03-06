@@ -3,19 +3,19 @@ import { Instagram } from "lucide-react"
 
 const previewImages = [
   {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PFP-Black-PrwFTaDbWXZr9S6Y5KiouNx5x0YhKZ.png",
+    src: "https://a7waintojpncbj2p.public.blob.vercel-storage.com/P3.png",
     alt: "Alienic star on textured silver",
   },
   {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/SC-%20Concept.1-Ee32igpxofdLPJjer1kWRmZ1zKmkV3.png",
+    src: "https://a7waintojpncbj2p.public.blob.vercel-storage.com/IMG_20250831_044015.jpg",
     alt: "Abstract metallic sculpture concept",
   },
   {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/PFP-White-Yab1gmXrg4upN6ybuve3oAVG39odZF.png",
+    src: "https://a7waintojpncbj2p.public.blob.vercel-storage.com/IMG_20251105_131151_115.webp",
     alt: "Alienic star on dark background",
   },
   {
-    src: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Business%20Card-Front-m3BoQOivskc8izgiDAkRwaU9IqcqJB.png",
+    src: "https://a7waintojpncbj2p.public.blob.vercel-storage.com/IMG_20260223_174026_644.jpg",
     alt: "Alienic business card design",
   },
 ]

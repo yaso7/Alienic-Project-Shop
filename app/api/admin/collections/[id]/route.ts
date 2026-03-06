@@ -3,6 +3,31 @@ import { prisma } from "@/lib/prisma"
 import { requireAuth } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  await requireAuth()
+  const { id } = await params
+
+  try {
+    await prisma.collection.delete({
+      where: { id },
+    })
+    
+    // Revalidate cache for home page (featured collections)
+    revalidatePath('/')
+    
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error("Delete error:", error)
+    return NextResponse.json(
+      { error: "Failed to delete collection" },
+      { status: 500 }
+    )
+  }
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
