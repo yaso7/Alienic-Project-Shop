@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Image from "next/image"
+import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 
 export const metadata: Metadata = {
@@ -38,57 +39,65 @@ export default async function ProjectsPage() {
             </div>
           ) : (
             collections.map((collection, index) => (
-              <div
+              <Link
                 key={collection.id}
-                className={`grid grid-cols-1 md:grid-cols-2 gap-12 items-center ${
-                  index % 2 === 1 ? "md:direction-rtl" : ""
-                }`}
+                href={`/shop/collection/${collection.slug}`}
+                className="block group"
               >
                 <div
-                  className={`relative aspect-[4/3] overflow-hidden group ${
-                    index % 2 === 1 ? "md:order-2" : ""
+                  className={`grid grid-cols-1 md:grid-cols-2 gap-12 items-center ${
+                    index % 2 === 1 ? "md:direction-rtl" : ""
                   }`}
                 >
-                  <Image
-                    src={collection.heroImage}
-                    alt={collection.title}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent" />
-                </div>
+                  <div
+                    className={`relative aspect-[4/3] overflow-hidden group ${
+                      index % 2 === 1 ? "md:order-2" : ""
+                    }`}
+                  >
+                    <Image
+                      src={collection.heroImage}
+                      alt={collection.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-700"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent" />
+                  </div>
 
-                <div
-                  className={`flex flex-col gap-4 ${
-                    index % 2 === 1 ? "md:order-1 md:text-right md:items-end" : ""
-                  }`}
-                >
-                  {collection.subtitle && (
-                    <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                      {collection.subtitle}
+                  <div
+                    className={`flex flex-col gap-4 ${
+                      index % 2 === 1 ? "md:order-1 md:text-right md:items-end" : ""
+                    }`}
+                  >
+                    {collection.subtitle && (
+                      <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                        {collection.subtitle}
+                      </p>
+                    )}
+                    <h3 className="hero-title text-3xl md:text-4xl text-foreground group-hover:text-primary transition-colors duration-300">
+                      {collection.title}
+                    </h3>
+                    {collection.mood.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {collection.mood.map((keyword, i) => (
+                          <span
+                            key={i}
+                            className="text-xs uppercase tracking-[0.2em] text-primary border border-border px-3 py-1"
+                          >
+                            {keyword}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <div className={`gothic-divider w-24 ${index % 2 === 1 ? "md:self-end" : ""}`} />
+                    <p className="text-base text-muted-foreground leading-relaxed">
+                      {collection.description}
                     </p>
-                  )}
-                  <h3 className="hero-title text-3xl md:text-4xl text-foreground">
-                    {collection.title}
-                  </h3>
-                  {collection.mood.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {collection.mood.map((keyword, i) => (
-                        <span
-                          key={i}
-                          className="text-xs uppercase tracking-[0.2em] text-primary border border-border px-3 py-1"
-                        >
-                          {keyword}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  <div className={`gothic-divider w-24 ${index % 2 === 1 ? "md:self-end" : ""}`} />
-                  <p className="text-base text-muted-foreground leading-relaxed">
-                    {collection.description}
-                  </p>
+                    <p className="text-sm text-primary uppercase tracking-[0.2em] group-hover:text-primary/80 transition-colors duration-300">
+                      View Collection →
+                    </p>
+                  </div>
                 </div>
-              </div>
+              </Link>
             ))
           )}
         </div>
