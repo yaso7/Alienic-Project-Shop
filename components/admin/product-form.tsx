@@ -381,12 +381,13 @@ export function ProductForm({ action, product, collections, currentAdminId }: Pr
         <Label htmlFor="collectionId">Collection</Label>
         <Select
           value={watch("collectionId") || ""}
-          onValueChange={(value) => setValue("collectionId", value || undefined)}
+          onValueChange={(value) => setValue("collectionId", value === "none" ? undefined : value)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select a collection (optional)" />
           </SelectTrigger>
           <SelectContent>
+            <SelectItem value="none">None</SelectItem>
             {collections.map((collection) => (
               <SelectItem key={collection.id} value={collection.id}>
                 {collection.title}
