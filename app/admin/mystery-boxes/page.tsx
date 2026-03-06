@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import Link from 'next/link'
-import { Plus } from 'lucide-react'
+import { Plus, Eye, CheckCircle, XCircle, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Table,
@@ -76,6 +76,8 @@ export default function MysteryBoxesPage() {
   const [sortBy, setSortBy] = useState('createdAt')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
+  const [viewingMysteryBox, setViewingMysteryBox] = useState<MysteryBox | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [editingMysteryBox, setEditingMysteryBox] = useState<MysteryBox | null>(null)
   
@@ -290,6 +292,64 @@ export default function MysteryBoxesPage() {
       }
     } catch (error) {
       console.error('Failed to delete mystery box:', error)
+    }
+  }
+
+  const handleView = (mysteryBox: MysteryBox) => {
+    console.log('Viewing mystery box:', mysteryBox)
+    setViewingMysteryBox(mysteryBox)
+    setIsViewDialogOpen(true)
+  }
+
+  const handleApprove = async (id: number) => {
+    if (!confirm('Are you sure you want to approve this mystery box?')) return
+    
+    try {
+      const response = await fetch(`/api/admin/mystery-boxes/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: 'Confirmed' }),
+      })
+      
+      if (response.ok) {
+        const result = await response.json()
+        console.log('Approve successful:', result)
+        fetchMysteryBoxes()
+      } else {
+        const errorData = await response.json().catch(() => ({}))
+        console.error('Approve failed:', response.status, errorData)
+        alert(`Failed to approve mystery box: ${errorData.error || 'Unknown error'}`)
+      }
+    } catch (error) {
+      console.error('Failed to approve mystery box:', error)
+    }
+  }
+
+  const handleDeny = async (id: number) => {
+    if (!confirm('Are you sure you want to deny this mystery box?')) return
+    
+    try {
+      const response = await fetch(`/api/admin/mystery-boxes/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: 'Cancelled' }),
+      })
+      
+      if (response.ok) {
+        const result = await response.json()
+        console.log('Deny successful:', result)
+        fetchMysteryBoxes()
+      } else {
+        const errorData = await response.json().catch(() => ({}))
+        console.error('Deny failed:', response.status, errorData)
+        alert(`Failed to deny mystery box: ${errorData.error || 'Unknown error'}`)
+      }
+    } catch (error) {
+      console.error('Failed to deny mystery box:', error)
     }
   }
 
@@ -623,17 +683,36 @@ export default function MysteryBoxesPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleEdit(mysteryBox)}
+                          onClick={() => handleView(mysteryBox)}
+                          className="p-2 h-8 w-8"
                         >
-                          Edit
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleApprove(mysteryBox.id)}
+                          className="p-2 h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50"
+                          disabled={mysteryBox.status !== 'Pending'}
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeny(mysteryBox.id)}
+                          className="p-2 h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          disabled={mysteryBox.status !== 'Pending'}
+                        >
+                          <XCircle className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleDelete(mysteryBox.id)}
-                          className="text-red-600 hover:text-red-700"
+                          className="p-2 h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
                         >
-                          Delete
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>
@@ -652,6 +731,94 @@ export default function MysteryBoxesPage() {
           )}
         </>
       )}
+
+      {/* View Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Mystery Box Details</DialogTitle>
+            <DialogDescription>
+              View the complete mystery box information.
+            </DialogDescription>
+          </DialogHeader>
+          {viewingMysteryBox && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Title</Label>
+                  <p className="text-sm">{viewingMysteryBox.title}</p>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Username</Label>
+                  <p className="text-sm">{viewingMysteryBox.username || '-'}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Bundle Size</Label>
+                  <Badge variant="outline">{viewingMysteryBox.bundleSize}</Badge>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Design</Label>
+                  <Badge variant="outline">
+                    {viewingMysteryBox.design === 'IDontCare' ? "I don't care" : viewingMysteryBox.design}
+                  </Badge>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Style Preference</Label>
+                  <Badge variant="outline">
+                    {viewingMysteryBox.stylePreference === 'IDontCare' ? "I don't care" : viewingMysteryBox.stylePreference}
+                  </Badge>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Neck Measurements</Label>
+                  <p className="text-sm">{viewingMysteryBox.neckMeasurements || '-'}</p>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Wrist Measurements</Label>
+                  <p className="text-sm">{viewingMysteryBox.wristMeasurements || '-'}</p>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Price</Label>
+                  <p className="text-sm font-semibold">${Number(viewingMysteryBox.price).toFixed(2)}</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground">Color Preference</Label>
+                <p className="text-sm">{viewingMysteryBox.colorPreference || '-'}</p>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-muted-foreground">Notes</Label>
+                <p className="text-sm">{viewingMysteryBox.notes || '-'}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Status</Label>
+                  <Badge 
+                    variant={viewingMysteryBox.status === 'Pending' ? 'outline' : 
+                            viewingMysteryBox.status === 'Delivered' ? 'default' : 'secondary'}
+                    className={viewingMysteryBox.status === 'Pending' ? 'text-yellow-600' : 
+                              viewingMysteryBox.status === 'Delivered' ? 'text-green-600' : ''}
+                  >
+                    {viewingMysteryBox.status}
+                  </Badge>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-muted-foreground">Created Date</Label>
+                  <p className="text-sm">{format(new Date(viewingMysteryBox.createdAt), 'MMM d, yyyy')}</p>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
