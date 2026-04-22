@@ -303,19 +303,19 @@ export function ShopGrid({ products, categories }: ShopGridProps) {
                   </div>
                 )}
               </div>
-              <div className="p-4 flex flex-col gap-1">
-                {product.collection && (
-                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                    {product.collection.title}
+              <div className="p-4 flex flex-col gap-1 h-full">
+                <div className="flex flex-col gap-1 flex-grow">
+                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground min-h-[1.2em]">
+                    {product.collection?.title || '\u00A0'}
                   </p>
-                )}
-                <h3 className="main-title text-3xl text-foreground group-hover:text-primary transition-colors duration-300">
-                  {product.name}
-                </h3>
-                <p className="text-xl text-primary">{product.price}</p>
-                <p className="text-m text-muted-foreground mt-1">
-                  {product.material}
-                </p>
+                  <h3 className="main-title text-3xl text-foreground group-hover:text-primary transition-colors duration-300">
+                    {product.name}
+                  </h3>
+                  <p className="text-xl text-primary">{product.price}</p>
+                  <p className="text-m text-muted-foreground mt-1">
+                    {product.material}
+                  </p>
+                </div>
                 {product.collection?.mood && product.collection.mood.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">
                     {product.collection.mood.map((mood, i) => (
