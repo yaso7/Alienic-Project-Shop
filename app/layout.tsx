@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Cormorant_Garamond, UnifrakturMaguntia } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import { LayoutWrapper } from '@/components/layout-wrapper'
 import './globals.css'
 
@@ -45,6 +46,7 @@ export default function RootLayout({
       <body className="font-serif antialiased">
         <LayoutWrapper>{children}</LayoutWrapper>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )
